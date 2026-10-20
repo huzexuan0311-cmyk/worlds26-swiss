@@ -5117,12 +5117,12 @@ body::-webkit-scrollbar-thumb {
         var delta;
         if (match.winner === match.a) {
           delta = k * (1 - expectedForA);
-          ratings[match.a] = clamp(ratings[match.a] + delta, 1100, 1900);
-          ratings[match.b] = clamp(ratings[match.b] - delta, 1100, 1900);
+          ratings[match.a] = clamp(ratings[match.a] + delta, 1000, 2600);
+          ratings[match.b] = clamp(ratings[match.b] - delta, 1000, 2600);
         } else {
           delta = k * (1 - (1 - expectedForA));
-          ratings[match.b] = clamp(ratings[match.b] + delta, 1100, 1900);
-          ratings[match.a] = clamp(ratings[match.a] - delta, 1100, 1900);
+          ratings[match.b] = clamp(ratings[match.b] + delta, 1000, 2600);
+          ratings[match.a] = clamp(ratings[match.a] - delta, 1000, 2600);
         }
       });
     });
