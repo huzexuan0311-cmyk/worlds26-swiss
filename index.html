@@ -3357,6 +3357,26 @@ body::-webkit-scrollbar-thumb {
 .railbar { animation: pageIn 0.6s var(--ease) both 0.3s; }
 
 /* ---------- 18. responsive ---------- */
+@media (min-width: 1600px) {
+  .round {
+    flex-basis: 240px;
+    width: 240px;
+  }
+
+  .board__track {
+    gap: 12px;
+  }
+
+  .final {
+    flex-basis: 300px;
+    width: 300px;
+  }
+
+  .round__ghost {
+    font-size: 92px;
+  }
+}
+
 @media (max-width: 1320px) {
   .round {
     flex-basis: 272px;
@@ -6486,15 +6506,17 @@ body::-webkit-scrollbar-thumb {
       if (byRecord[key]) byRecord[key].push(id);
     });
 
+    var seedOffset = 0;
     var groupHtml = groups.map(function (group) {
       var ids = byRecord[group.key];
       var slots = '';
       for (var i = 0; i < group.count; i++) {
         var id = ids[i];
+        var seedNo = pad2(seedOffset + i + 1);
         if (id) {
           var rec = model.records[id];
-          slots += '<div class="qslot is-filled" data-team="' + id + '" style="--tone:' + regionColor(id) + '">' +
-            '<span class="qslot__idx mono">' + pad2(i + 1) + '</span>' +
+          slots += '<div class="qslot is-filled" data-team="' + id + '" data-seed="' + (seedOffset + i + 1) + '" style="--tone:' + regionColor(id) + '">' +
+            '<span class="qslot__idx mono">' + seedNo + '</span>' +
             teamLogo(id, true) +
             '<span class="qslot__id">' +
               '<span class="qslot__code">' + esc(TEAM[id].code) + '</span>' +
@@ -6503,13 +6525,14 @@ body::-webkit-scrollbar-thumb {
             '<span class="qslot__rec mono">' + ENG.recordLabel(rec.w, rec.l) + '</span>' +
           '</div>';
         } else {
-          slots += '<div class="qslot is-empty">' +
-            '<span class="qslot__idx mono">' + pad2(i + 1) + '</span>' +
+          slots += '<div class="qslot is-empty" data-seed="' + (seedOffset + i + 1) + '">' +
+            '<span class="qslot__idx mono">' + seedNo + '</span>' +
             '<span class="qslot__code">待定</span>' +
             '<span class="qslot__rec mono">' + group.rec + '</span>' +
           '</div>';
         }
       }
+      seedOffset += group.count;
       return '<section class="qgroup" data-group="' + group.key + '">' +
         '<header class="qgroup__head">' +
           '<span class="qgroup__rec">' + group.rec + '</span>' +
