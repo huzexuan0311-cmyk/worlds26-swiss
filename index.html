@@ -5225,23 +5225,25 @@ body::-webkit-scrollbar-thumb {
   'use strict';
   /* Polymarket pre-match snapshot for Worlds 2026 Swiss Round 1.
      Prices captured 2026-10-20 (Asia/Hong_Kong), before the first match.
+     tokens enable the public CLOB market WebSocket for live updates.
      This file is display-only; it does not change model probabilities. */
   root.PM_R1_2026 = [
-    { a: 'BLG', b: 'MKOI', pA: 0.815, start: '2026-10-24 00:00:00+00' },
-    { a: 'TSW', b: 'LYON', pA: 0.415, start: '2026-10-23 23:00:00+00' },
-    { a: 'LOS', b: 'T1', pA: 0.125, start: '2026-10-23 22:00:00+00' },
-    { a: 'HLE', b: 'TES', pA: 0.785, start: '2026-10-23 21:00:00+00' },
-    { a: 'G2', b: 'DK', pA: 0.385, start: '2026-10-23 20:00:00+00' },
-    { a: 'AL', b: 'KC', pA: 0.665, start: '2026-10-23 19:00:00+00' },
-    { a: 'TLAW', b: 'CFO', pA: 0.715, start: '2026-10-23 18:00:00+00' },
-    { a: 'GEN', b: 'IG', pA: 0.775, start: '2026-10-23 17:00:00+00' }
+    { a: 'BLG', b: 'MKOI', pA: 0.815, start: '2026-10-24T00:00:00Z', tokens: ['80681350167081345387188830570748285552312548625594614764149183642820220575429','43259706965313394686477024746244743754810950406229193447156278754597380165018'] },
+    { a: 'TSW', b: 'LYON', pA: 0.415, start: '2026-10-23T23:00:00Z', tokens: ['62952148071425524087619205320068634295985136865210538799954468541828485390166','65198542954971072457090006090828270286662357946523093527735544591791843980032'] },
+    { a: 'LOS', b: 'T1', pA: 0.125, start: '2026-10-23T22:00:00Z', tokens: ['29333334019139817447151700116338525061857555894700496774613620253316163641269','32512913109959372635651124100144167376239740641342848502922824921056826792282'] },
+    { a: 'HLE', b: 'TES', pA: 0.785, start: '2026-10-23T21:00:00Z', tokens: ['18724120934765507673671290266127048955936873230517337974714924734525688124106','3746811607983342965144083879627922628914188740904568706745631933422838907140'] },
+    { a: 'G2', b: 'DK', pA: 0.385, start: '2026-10-23T20:00:00Z', tokens: ['25254383287130426656176153294689261022971513354701733211726258646065618778842','47396876078760813133804793491418961115790596215906854630629564623690959183354'] },
+    { a: 'AL', b: 'KC', pA: 0.665, start: '2026-10-23T19:00:00Z', tokens: ['86251960487333944829295436845339778503135448830171904215992256311240482877451','46602514397165613480102220189767438937377959307884575445865556310887371607789'] },
+    { a: 'TLAW', b: 'CFO', pA: 0.715, start: '2026-10-23T18:00:00Z', tokens: ['23856249771973605697778858622586207369848807887907623928269226525886225578276','98214227272775431699728564609922746323189192121700078829614978577051939928927'] },
+    { a: 'GEN', b: 'IG', pA: 0.775, start: '2026-10-23T17:00:00Z', tokens: ['72557937594764320538887838691764854594118877065852846215514308974817657197809','111007383297658799731210891739784511348882665853883919817395863951255605211468'] }
   ];
   root.PM_R1_META = {
-    capturedAt: '2026-10-20T13:12:48.750Z',
+    capturedAt: '2026-10-20T20:56:00+08:00',
     source: 'Polymarket Worlds 2026 Group Stage markets',
-    note: '赛前快照，仅显示对照；不参与默认模型。'
+    note: '赛前快照；WS 可实时更新，仅显示对照；不参与默认模型。'
   };
-  root.PM_API = '/api/pm';
+  root.PM_API = '';
+  root.PM_WS_URL = 'wss://ws-subscriptions-clob.polymarket.com/ws/market';
   root.PM_TEAM_CODES = {
     'Bilibili Gaming': 'BLG',
     'Movistar KOI': 'MKOI',
@@ -5260,7 +5262,7 @@ body::-webkit-scrollbar-thumb {
     'Gen.G': 'GEN',
     'Invictus Gaming': 'IG'
   };
-  root.PM_LIVE = { ok: false, at: null, error: null };
+  root.PM_LIVE = { ok: false, at: null, error: null, source: 'snapshot' };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -6027,6 +6029,75 @@ body::-webkit-scrollbar-thumb {
       el.textContent = 'MKT ' + pct(market.p) + '%';
       el.title = 'Polymarket ' + (market.live ? '实时' : '赛前快照') + ' · ' + (market.meta && market.meta.capturedAt ? market.meta.capturedAt : '');
     });
+  }
+
+  var marketSocket = null;
+  var marketSocketTimer = null;
+  var marketTokenMap = null;
+
+  function bestPrice(levels, side) {
+    if (!Array.isArray(levels) || !levels.length) return null;
+    var values = levels.map(function (x) { return Number(x.price); }).filter(function (x) { return isFinite(x) && x > 0 && x < 1; });
+    if (!values.length) return null;
+    return side === 'bid' ? Math.max.apply(null, values) : Math.min.apply(null, values);
+  }
+
+  function updateFromBook(msg) {
+    if (!msg || !msg.asset_id || !marketTokenMap) return;
+    var hit = marketTokenMap[msg.asset_id];
+    if (!hit) return;
+    var bid = bestPrice(msg.bids, 'bid');
+    var ask = bestPrice(msg.asks, 'ask');
+    var mid = null;
+    if (bid != null && ask != null) mid = (bid + ask) / 2;
+    else if (bid != null) mid = bid;
+    else if (ask != null) mid = ask;
+    if (mid == null) return;
+    if (hit.side === 0) hit.row.pA = mid;
+    else hit.row.pA = 1 - mid;
+    window.PM_LIVE.ok = true;
+    window.PM_LIVE.at = new Date().toISOString();
+    window.PM_LIVE.source = 'clob-ws';
+    updateMarketBadges();
+  }
+
+  function startMarketSocket() {
+    if (!window.PM_WS_URL || typeof WebSocket === 'undefined' || !window.PM_R1_2026) return;
+    if (marketSocket) return;
+    var assets = [];
+    marketTokenMap = {};
+    window.PM_R1_2026.forEach(function (row) {
+      if (!row.tokens) return;
+      row.tokens.forEach(function (token, side) {
+        marketTokenMap[token] = { row: row, side: side };
+        assets.push(token);
+      });
+    });
+    if (!assets.length) return;
+    try {
+      marketSocket = new WebSocket(window.PM_WS_URL);
+    } catch (err) {
+      window.PM_LIVE.error = String(err);
+      return;
+    }
+    marketSocket.onopen = function () {
+      window.PM_LIVE.error = null;
+      marketSocket.send(JSON.stringify({ assets_ids: assets, type: 'market' }));
+    };
+    marketSocket.onmessage = function (event) {
+      try {
+        var data = JSON.parse(event.data);
+        var list = Array.isArray(data) ? data : [data];
+        list.forEach(updateFromBook);
+      } catch (err) { /* non-book message */ }
+    };
+    marketSocket.onerror = function () { window.PM_LIVE.error = 'websocket error'; };
+    marketSocket.onclose = function () {
+      marketSocket = null;
+      window.PM_LIVE.ok = false;
+      if (marketSocketTimer) window.clearTimeout(marketSocketTimer);
+      marketSocketTimer = window.setTimeout(startMarketSocket, 5000);
+    };
   }
 
   function refreshMarket() {
@@ -7770,6 +7841,7 @@ body::-webkit-scrollbar-thumb {
     bindEvents();
     renderAll({ freshRound: model.activeRound });
     refreshMarket();
+    startMarketSocket();
     window.setInterval(refreshMarket, 60000);
     if (hashState) showToast('已载入分享的预测');
   }
