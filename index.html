@@ -544,6 +544,42 @@ body::-webkit-scrollbar-thumb {
   animation: pulseDot 2.2s ease-in-out infinite;
 }
 
+.board-mode {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.board-mode__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--line-soft);
+  background: rgba(3, 20, 56, 0.45);
+  color: var(--dim);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.board-mode__btn.is-active {
+  border-color: rgba(111, 226, 255, 0.65);
+  background: rgba(28, 91, 190, 0.4);
+  color: var(--white);
+}
+
+.board-mode__live {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 7px var(--cyan);
+}
+
 /* ---------- 7. rail ---------- */
 .railbar {
   position: sticky;
@@ -1281,6 +1317,14 @@ body::-webkit-scrollbar-thumb {
   font-style: normal;
   font-size: 9px;
   color: var(--dim);
+}
+
+.team--live {
+  cursor: default;
+}
+
+.team--live:hover {
+  background: transparent;
 }
 
 .team.is-favorite .team__pct {
@@ -3965,6 +4009,10 @@ body::-webkit-scrollbar-thumb {
         <span class="console__dot" aria-hidden="true"></span>
         <span id="pick-hint">拖动队名至对阵卡 · 点击亦可</span>
       </p>
+      <div class="board-mode" role="group" aria-label="看板模式">
+        <button type="button" class="board-mode__btn is-active" data-board-mode="predict">我的预测</button>
+        <button type="button" class="board-mode__btn" data-board-mode="live">实时赛果 <i class="board-mode__live"></i></button>
+      </div>
     </section>
 
     <div class="railbar" id="railbar">
@@ -5318,17 +5366,17 @@ body::-webkit-scrollbar-thumb {
      tokens enable the public CLOB market WebSocket for live updates.
      This file is display-only; it does not change model probabilities. */
   root.PM_R1_2026 = [
-    { a: 'BLG', b: 'MKOI', pA: 0.815, start: '2026-10-24 00:00:00+00' },
-    { a: 'TSW', b: 'LYON', pA: 0.415, start: '2026-10-23 23:00:00+00' },
-    { a: 'LOS', b: 'T1', pA: 0.125, start: '2026-10-23 22:00:00+00' },
-    { a: 'HLE', b: 'TES', pA: 0.785, start: '2026-10-23 21:00:00+00' },
-    { a: 'G2', b: 'DK', pA: 0.385, start: '2026-10-23 20:00:00+00' },
-    { a: 'AL', b: 'KC', pA: 0.665, start: '2026-10-23 19:00:00+00' },
-    { a: 'TLAW', b: 'CFO', pA: 0.715, start: '2026-10-23 18:00:00+00' },
-    { a: 'GEN', b: 'IG', pA: 0.775, start: '2026-10-23 17:00:00+00' }
+    { a: 'BLG', b: 'MKOI', pA: 0.815, start: '2026-10-24T00:00:00Z', tokens: ['80681350167081345387188830570748285552312548625594614764149183642820220575429','43259706965313394686477024746244743754810950406229193447156278754597380165018'] },
+    { a: 'TSW', b: 'LYON', pA: 0.415, start: '2026-10-23T23:00:00Z', tokens: ['62952148071425524087619205320068634295985136865210538799954468541828485390166','65198542954971072457090006090828270286662357946523093527735544591791843980032'] },
+    { a: 'LOS', b: 'T1', pA: 0.125, start: '2026-10-23T22:00:00Z', tokens: ['29333334019139817447151700116338525061857555894700496774613620253316163641269','32512913109959372635651124100144167376239740641342848502922824921056826792282'] },
+    { a: 'HLE', b: 'TES', pA: 0.785, start: '2026-10-23T21:00:00Z', tokens: ['18724120934765507673671290266127048955936873230517337974714924734525688124106','3746811607983342965144083879627922628914188740904568706745631933422838907140'] },
+    { a: 'G2', b: 'DK', pA: 0.385, start: '2026-10-23T20:00:00Z', tokens: ['25254383287130426656176153294689261022971513354701733211726258646065618778842','47396876078760813133804793491418961115790596215906854630629564623690959183354'] },
+    { a: 'AL', b: 'KC', pA: 0.665, start: '2026-10-23T19:00:00Z', tokens: ['86251960487333944829295436845339778503135448830171904215992256311240482877451','46602514397165613480102220189767438937377959307884575445865556310887371607789'] },
+    { a: 'TLAW', b: 'CFO', pA: 0.715, start: '2026-10-23T18:00:00Z', tokens: ['23856249771973605697778858622586207369848807887907623928269226525886225578276','98214227272775431699728564609922746323189192121700078829614978577051939928927'] },
+    { a: 'GEN', b: 'IG', pA: 0.775, start: '2026-10-23T17:00:00Z', tokens: ['72557937594764320538887838691764854594118877065852846215514308974817657197809','111007383297658799731210891739784511348882665853883919817395863951255605211468'] }
   ];
   root.PM_R1_META = {
-    capturedAt: '2026-10-20T13:35:52.268Z',
+    capturedAt: '2026-10-20T20:56:00+08:00',
     source: 'Polymarket Worlds 2026 Group Stage markets',
     note: '赛前快照；WS 可实时更新，仅显示对照；不参与默认模型。'
   };
@@ -5363,75 +5411,8 @@ body::-webkit-scrollbar-thumb {
      Updated by GitHub Actions; this file never changes the prediction state. */
   root.RESULTS_API = 'https://vercel-seven-opal-76.vercel.app/api/results';
   root.RESULTS_2026 = {
-    updatedAt: "2026-10-20T13:35:52.642Z",
-    matches: [
-      {
-        "id": "115660588583171786",
-        "date": "2026-10-15",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "KC",
-        "b": "C9",
-        "scoreA": 3,
-        "scoreB": 2,
-        "winner": "KC"
-      },
-      {
-        "id": "115660588583040710",
-        "date": "2026-10-15",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "MVK",
-        "b": "FUR",
-        "scoreA": 3,
-        "scoreB": 0,
-        "winner": "MVK"
-      },
-      {
-        "id": "115660588583171790",
-        "date": "2026-10-16",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "KC",
-        "b": "MVK",
-        "scoreA": 3,
-        "scoreB": 0,
-        "winner": "KC"
-      },
-      {
-        "id": "115660588583171794",
-        "date": "2026-10-16",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "FUR",
-        "b": "C9",
-        "scoreA": 3,
-        "scoreB": 1,
-        "winner": "FUR"
-      },
-      {
-        "id": "115660588583171798",
-        "date": "2026-10-17",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "MVK",
-        "b": "FUR",
-        "scoreA": 3,
-        "scoreB": 1,
-        "winner": "MVK"
-      },
-      {
-        "id": "116299649498303884",
-        "date": "2026-10-18",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "KC",
-        "b": "MVK",
-        "scoreA": 3,
-        "scoreB": 0,
-        "winner": "KC"
-      }
-    ]
+    updatedAt: null,
+    matches: []
   };
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -5510,6 +5491,7 @@ body::-webkit-scrollbar-thumb {
   var UPSET_KEY = 'worlds26-upset';
   var MODEL_MODE_KEY = 'worlds26-model-mode-v3';
   var modelMode = 'heuristic';
+  var boardMode = 'predict';
   var drag = null;
   var pendingUndo = null;
   var toastTimer = null;
@@ -6409,6 +6391,204 @@ body::-webkit-scrollbar-thumb {
 
   /* ---------- render: board ---------- */
 
+  /* ---------- render: live actual board ---------- */
+
+  function actualTeamBase() {
+    return window.BT_RATINGS || MODEL.baseRatings();
+  }
+
+  function actualMatches() {
+    var base = actualTeamBase();
+    return ((window.RESULTS_2026 && window.RESULTS_2026.matches) || [])
+      .filter(function (m) { return base[m.a] != null && base[m.b] != null; })
+      .slice()
+      .sort(function (a, b) {
+        return String(a.startTime || a.date).localeCompare(String(b.startTime || b.date));
+      });
+  }
+
+  function buildLiveModel() {
+    var base = actualTeamBase();
+    var records = {};
+    Object.keys(TEAM).forEach(function (id) { records[id] = { w: 0, l: 0 }; });
+    var rounds = [1, 2, 3, 4, 5].map(function (n) { return { number: n, pools: [], matches: [], complete: false }; });
+    var poolMap = {};
+    var number = 1;
+    var played = 0;
+
+    actualMatches().forEach(function (m) {
+      var ra = records[m.a], rb = records[m.b];
+      var roundNo = Math.max(1, Math.min(5, ra.w + ra.l + 1));
+      var round = rounds[roundNo - 1];
+      var key = ra.w + '-' + ra.l;
+      var pid = roundNo + '|' + key;
+      if (!poolMap[pid]) {
+        poolMap[pid] = {
+          record: ENG.recordLabel(ra.w, ra.l),
+          wins: ra.w,
+          losses: ra.l,
+          decider: ra.w === 2 || ra.l === 2,
+          matches: []
+        };
+        round.pools.push(poolMap[pid]);
+      }
+      var match = {
+        id: m.id,
+        number: number++,
+        round: roundNo,
+        a: m.a,
+        b: m.b,
+        aStart: ENG.recordLabel(ra.w, ra.l),
+        bStart: ENG.recordLabel(rb.w, rb.l),
+        format: (Number(m.bo) || 1) >= 3 ? 'BO3' : 'BO1',
+        state: m.state || 'unstarted',
+        scoreA: m.scoreA,
+        scoreB: m.scoreB,
+        winner: m.winner,
+        loser: m.winner === m.a ? m.b : (m.winner === m.b ? m.a : null)
+      };
+      poolMap[pid].matches.push(match);
+      round.matches.push(match);
+      if (match.state === 'completed' && match.winner) {
+        records[match.winner].w += 1;
+        records[match.loser].l += 1;
+        played += 1;
+      }
+    });
+
+    rounds.forEach(function (round) {
+      var skel = round.number === 1
+        ? [{ record: ENG.recordLabel(0, 0), wins: 0, losses: 0, decider: false }]
+        : (SKELETON[round.number] ? SKELETON[round.number].pools : []);
+      skel.forEach(function (s) {
+        var found = round.pools.some(function (p) { return p.wins === s.wins && p.losses === s.losses; });
+        if (!found) {
+          round.pools.push({ record: s.record, wins: s.wins, losses: s.losses, decider: s.decider || s.wins === 2 || s.losses === 2, matches: [] });
+        }
+      });
+      round.pools.sort(function (a, b) {
+        if (a.wins !== b.wins) return b.wins - a.wins;
+        return a.losses - b.losses;
+      });
+      round.complete = round.matches.length > 0 && round.matches.every(function (m) { return m.state === 'completed'; });
+    });
+
+    var qualified = Object.keys(records).filter(function (id) { return records[id].w >= 3; });
+    qualified.sort(function (a, b) {
+      if (records[a].l !== records[b].l) return records[a].l - records[b].l;
+      return (base[b] || 0) - (base[a] || 0);
+    });
+    var eliminated = Object.keys(records).filter(function (id) { return records[id].l >= 3; });
+    eliminated.sort(function (a, b) { return (base[a] || 0) - (base[b] || 0); });
+
+    var activeRound = 5;
+    for (var r = 0; r < rounds.length; r++) {
+      if (rounds[r].matches.some(function (m) { return m.state !== 'completed'; })) { activeRound = rounds[r].number; break; }
+    }
+
+    return {
+      rounds: rounds,
+      records: records,
+      qualified: qualified,
+      eliminated: eliminated,
+      activeRound: activeRound,
+      allDone: qualified.length === 8,
+      totals: { played: played, remaining: 33 - played }
+    };
+  }
+
+  function renderLiveTeam(id, match, score, isWinner, isLoser) {
+    var team = TEAM[id];
+    var rec = match.a === id ? match.aStart : match.bStart;
+    var classes = ['team', 'team--live'];
+    if (isWinner) classes.push('is-winner');
+    if (isLoser) classes.push('is-loser');
+    return '<div class="' + classes.join(' ') + '">' +
+      teamLogo(id, true) +
+      '<span class="team__id"><span class="team__code">' + esc(team.code) + '</span>' +
+        '<span class="team__name">' + esc(team.name) + ' <i class="team__rec mono">' + rec + '</i></span></span>' +
+      '<span class="team__pct"><b>' + (score == null ? '–' : score) + '</b></span>' +
+    '</div>';
+  }
+
+  function renderLiveMatch(match, index) {
+    var isDone = match.state === 'completed';
+    var classes = ['match', 'match--live'];
+    if (isDone) classes.push('is-decided');
+    if (isDone && match.winner) classes.push('is-qualifier');
+    var aWin = isDone && match.winner === match.a;
+    var bWin = isDone && match.winner === match.b;
+    var aScore = isDone ? match.scoreA : null;
+    var bScore = isDone ? match.scoreB : null;
+    var total = (Number(aScore) || 0) + (Number(bScore) || 0);
+    var width = total > 0 ? (Number(aScore) / total) * 100 : 50;
+    var stateText = match.state === 'completed' ? '已完成' : (match.state === 'inProgress' ? '进行中' : '未开始');
+    return '<article class="' + classes.join(' ') + '" data-live="' + esc(match.id) + '" data-teams="' + match.a + ' ' + match.b + '" style="--i:' + index + '">' +
+      renderLiveTeam(match.a, match, aScore, aWin, isDone && bWin) +
+      '<div class="match__vs" aria-hidden="true"></div>' +
+      renderLiveTeam(match.b, match, bScore, bWin, isDone && aWin) +
+      '<div class="match__prob" title="实际系列赛比分"><span class="match__prob-track" aria-hidden="true">' +
+        '<i style="width:' + width.toFixed(1) + '%"></i><b style="left:' + width.toFixed(1) + '%"></b>' +
+      '</span></div>' +
+      '<footer class="match__foot">' +
+        '<span class="match__meta-mono mono">#' + pad2(match.number) + ' · ' + match.format + '</span>' +
+        '<span class="match__market mono">' + esc(stateText) + '</span>' +
+      '</footer>' +
+    '</article>';
+  }
+
+  function renderLiveRound(round) {
+    var meta = ROUND_META[round.number - 1];
+    var pools = round.pools.map(function (pool) {
+      var matches = pool.matches.map(function (m, i) { return renderLiveMatch(m, i); }).join('');
+      var tag = poolStatusTag(pool);
+      return '<section class="pool' + (pool.decider ? ' pool--decider' : '') + '">' +
+        '<header class="pool__head"><div class="pool__label">' +
+          '<span class="pool__record">' + esc(pool.record) + '</span>' +
+          (tag ? '<span class="pool__tag ' + tag.cls + '">' + tag.text + '</span>' : '') +
+        '</div><div class="pool__info"><span class="pool__note">' + esc(poolNote(pool)) + '</span>' +
+          '<span class="pool__count mono">' + pool.matches.length + ' MATCHES</span></div></header>' +
+        '<div class="pool__matches">' + matches + '</div>' +
+      '</section>';
+    }).join('');
+    var stateLabel = round.complete ? 'FINAL' : (round.matches.some(function (m) { return m.state === 'inProgress'; }) ? 'LIVE' : 'LOCKED');
+    return '<article class="round' + (round.complete ? ' is-complete' : '') + '" data-round="' + round.number + '">' +
+      '<span class="round__ghost" aria-hidden="true">' + pad2(round.number) + '</span>' +
+      '<header class="round__head"><div class="round__top">' +
+        '<span class="round__round mono">ROUND ' + pad2(round.number) + '</span>' +
+        '<span class="round__date mono">' + esc(dateLabel(meta)) + '</span>' +
+        '<span class="round__state">' + stateLabel + '</span>' +
+      '</div><div class="round__sub"><span class="mono">' + round.matches.length + ' 场 · 实际赛程</span></div></header>' +
+      '<div class="round__pools">' + pools + '</div>' +
+    '</article>';
+  }
+
+  function renderLiveAll() {
+    var live = buildLiveModel();
+    var saved = model;
+    model = live;
+    var finalHtml = renderFinal();
+    model = saved;
+    var html = live.rounds.map(function (round) {
+      if (round.matches.length) return renderLiveRound(round);
+      return renderLockedRound(ROUND_META[round.number - 1]);
+    }).join('');
+    dom.track.innerHTML = html + finalHtml;
+    dom.pickCount.textContent = live.totals.played + ' / 33';
+    dom.statQualified.textContent = live.qualified.length;
+    dom.statEliminated.textContent = live.eliminated.length;
+    dom.statRemaining.textContent = live.totals.remaining;
+    updateBoardMode();
+    scheduleBracketLines();
+  }
+
+  function updateBoardMode() {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-board-mode]'), function (button) {
+      button.classList.toggle('is-active', button.getAttribute('data-board-mode') === boardMode);
+    });
+  }
+
+
   function renderBoard(options) {
     var html = '';
     var freshRound = options && options.freshRound;
@@ -7169,7 +7349,7 @@ body::-webkit-scrollbar-thumb {
     var data = window.RESULTS_2026 || { matches: [] };
     var matches = (data.matches || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
     var base = window.BT_RATINGS || MODEL.baseRatings();
-    matches = matches.filter(function (m) { return base[m.a] != null && base[m.b] != null; });
+    matches = matches.filter(function (m) { return base[m.a] != null && base[m.b] != null && (m.state === 'completed' || m.winner); });
     var live = {};
     var rec = {};
     Object.keys(base).forEach(function (id) {
@@ -7220,6 +7400,7 @@ body::-webkit-scrollbar-thumb {
       if (!data || !Array.isArray(data.matches)) return;
       window.RESULTS_2026 = { updatedAt: data.updatedAt || new Date().toISOString(), matches: data.matches };
       if (dom.resultsDialog && dom.resultsDialog.open) renderResultsBody();
+      if (boardMode === 'live') renderLiveAll();
     }).catch(function () { /* static snapshot fallback */ });
   }
 
@@ -7237,6 +7418,10 @@ body::-webkit-scrollbar-thumb {
 
   function renderAll(options) {
     options = options || {};
+    if (boardMode === 'live') {
+      renderLiveAll();
+      return;
+    }
     model = computeModel();
     probState = MODEL.computeProbabilities(model);
     resetChampionStats();
@@ -7251,6 +7436,7 @@ body::-webkit-scrollbar-thumb {
     renderOdds();
     renderSwissOdds();
     scheduleBracketLines();
+    updateBoardMode();
 
     dom.board.scrollLeft = previousScroll;
     window.requestAnimationFrame(function () {
@@ -7747,6 +7933,17 @@ body::-webkit-scrollbar-thumb {
 
     dom.btnModel.addEventListener('click', openModelDialog);
     if (dom.btnResults) dom.btnResults.addEventListener('click', openResultsDialog);
+
+    Array.prototype.forEach.call(document.querySelectorAll('[data-board-mode]'), function (button) {
+      button.addEventListener('click', function () {
+        var next = button.getAttribute('data-board-mode');
+        if (next === boardMode) return;
+        boardMode = next;
+        updateBoardMode();
+        renderAll({});
+        if (boardMode === 'live') refreshResults();
+      });
+    });
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-model-mode]'), function (button) {
       button.addEventListener('click', function () {
