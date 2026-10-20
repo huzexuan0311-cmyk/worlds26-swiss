@@ -7282,17 +7282,28 @@ body { font-size: 16px; }
         '<a href="https://huggingface.co/datasets/gptilt/lol-esports-matches" target="_blank" rel="noreferrer">逐地图数据</a></p>';
   }
 
+  function effectiveRating(teamId, raw) {
+    var region = TEAM[teamId] ? TEAM[teamId].region : '';
+    var tau = window.TOP_LEAGUE_TAU || {};
+    return raw + (tau[region] != null ? tau[region] * 400 : 0);
+  }
+
   function renderBtModelBody() {
     var bt = window.BT_RATINGS || {};
     var meta = window.BT_META || {};
     var current = probState ? probState.ratings : MODEL.baseRatings();
-    var rows = MODEL.allBreakdowns().slice().sort(function (a, b) {
-      return (current[b.teamId] || 0) - (current[a.teamId] || 0);
+    var rows = MODEL.allBreakdowns().slice();
+    rows.sort(function (a, b) {
+      var ea = effectiveRating(a.teamId, current[a.teamId] || 0);
+      var eb = effectiveRating(b.teamId, current[b.teamId] || 0);
+      return eb - ea;
     });
     var tableRows = rows.map(function (row, index) {
       var team = TEAM[row.teamId];
       var cur = Math.round(current[row.teamId]);
       var rating = bt[row.teamId];
+      var raw = rating == null ? row.rating : rating;
+      var eff = effectiveRating(row.teamId, current[row.teamId] || 0);
       var delta = rating == null ? cur - Math.round(row.rating) : Math.round(cur - rating);
       return '<tr data-team="' + row.teamId + '">' +
         '<td class="model-table__rank mono">' + pad2(index + 1) + '</td>' +
@@ -7301,6 +7312,8 @@ body { font-size: 16px; }
         '<td class="model-table__base mono">' + Math.round(row.base) + '</td>' +
         '<td class="model-table__base mono" title="逐地图 Bradley-Terry，1500 + 400 × θ">' +
           (rating == null ? '—' : Math.round(rating)) + '</td>' +
+        '<td class="model-table__base mono" title="原始 BT + 赛区 τ × 400；τ 只在面对 LPL/LCK 时使用">' +
+          Math.round(eff) + '</td>' +
         '<td class="model-table__rating mono">' + cur + '<i class="' + (delta >= 0 ? 'is-up' : 'is-down') + '">' +
           (delta >= 0 ? '+' + delta : delta) + '</i></td>' +
       '</tr>';
@@ -7322,10 +7335,11 @@ body { font-size: 16px; }
         '<p><b>评分口径</b>逐地图 BT 使用每张地图的蓝/红方与胜者；BO3/BO5 的系列赛概率由 <code>p²(3−2p)</code> / <code>p³(10−15p+6p²)</code> 合成。GPR 基准列仅作交叉检查，不直接叠加到 BT 分上。</p>' +
         '<p><b>数据覆盖</b>LPL / LCK / LEC / LCS / CBLOL / LCP + MSI / First Stand / EWC / Worlds Play-In；没有把 2025 Worlds 当输入。</p>' +
         '<p><b>校准结论</b>同一 75/25 时间外测试中，逐地图 BT 的 Brier 为 <b>' + (meta.validation || '—') + '</b>；比赛日 GPR 基准为 Brier 0.3265 / LogLoss 1.3363。</p>' +
+        '<p><b>跨区有效分</b>表格按「原始 BT + 赛区 τ × 400」排序：LEC ' + (window.TOP_LEAGUE_TAU && window.TOP_LEAGUE_TAU.LEC != null ? window.TOP_LEAGUE_TAU.LEC : '—') + ' / LCS ' + (window.TOP_LEAGUE_TAU && window.TOP_LEAGUE_TAU.LCS != null ? window.TOP_LEAGUE_TAU.LCS : '—') + ' / LCP ' + (window.TOP_LEAGUE_TAU && window.TOP_LEAGUE_TAU.LCP != null ? window.TOP_LEAGUE_TAU.LCP : '—') + '。τ 只在面对 LPL/LCK 时生效，所以原始 BT 高、跨区有效分低是正常的。</p>' +
       '</div>' +
       '<div class="model__table-wrap">' +
         '<table class="model-table">' +
-          '<thead><tr><th>#</th><th>战队</th><th>GPR 基准</th><th>逐地图 BT</th><th>当前</th></tr></thead>' +
+          '<thead><tr><th># 有效</th><th>战队</th><th>GPR 基准</th><th>原始 BT</th><th>跨区有效</th><th>当前</th></tr></thead>' +
           '<tbody>' + tableRows + '</tbody>' +
         '</table>' +
       '</div>' +
