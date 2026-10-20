@@ -7682,6 +7682,7 @@ body::-webkit-scrollbar-thumb {
   /* ---------- drag & drop ---------- */
 
   function onPointerDown(event) {
+    if (boardMode === 'live') return;
     if (event.button !== 0 && event.pointerType === 'mouse') return;
     var row = event.target.closest('.team');
     if (!row) return;
@@ -7814,6 +7815,7 @@ body::-webkit-scrollbar-thumb {
     if (dom.koBracket) dom.koBracket.addEventListener('pointerdown', onPointerDown);
 
     dom.track.addEventListener('click', function (event) {
+      if (boardMode === 'live') return;
       var undoBtn = event.target.closest('.match__undo');
       if (undoBtn) {
         event.preventDefault();
