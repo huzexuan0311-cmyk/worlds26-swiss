@@ -6243,8 +6243,8 @@ body { font-size: 16px; }
     if (!window.PM_R1_2026) return null;
     for (var i = 0; i < window.PM_R1_2026.length; i++) {
       var row = window.PM_R1_2026[i];
-      if (row.a === teamA && row.b === teamB) return { p: row.pA, meta: window.PM_R1_META, live: window.PM_LIVE.ok };
-      if (row.a === teamB && row.b === teamA) return { p: 1 - row.pA, meta: window.PM_R1_META, live: window.PM_LIVE.ok };
+      if (row.a === teamA && row.b === teamB) return { p: row.pA, meta: window.PM_R1_META, live: window.PM_LIVE.ok, frozen: !!row.frozen };
+      if (row.a === teamB && row.b === teamA) return { p: 1 - row.pA, meta: window.PM_R1_META, live: window.PM_LIVE.ok, frozen: !!row.frozen };
     }
     return null;
   }
@@ -6271,7 +6271,7 @@ body { font-size: 16px; }
         if (foot) foot.appendChild(el);
       }
       el.textContent = 'MKT ' + pct(market.p) + '%';
-      el.title = 'Polymarket ' + (market.live ? '实时' : '赛前快照') + ' · ' + (market.meta && market.meta.capturedAt ? market.meta.capturedAt : '');
+      el.title = 'Polymarket ' + (market.frozen ? '赛前最后一分钟冻结' : (market.live ? '实时' : '赛前快照')) + ' · ' + (market.meta && market.meta.capturedAt ? market.meta.capturedAt : '');
     });
   }
 
@@ -6297,8 +6297,17 @@ body { font-size: 16px; }
     else if (bid != null) mid = bid;
     else if (ask != null) mid = ask;
     if (mid == null) return;
-    if (hit.side === 0) hit.row.pA = mid;
-    else hit.row.pA = 1 - mid;
+    var priceA = hit.side === 0 ? mid : 1 - mid;
+    var start = hit.row.start ? Date.parse(hit.row.start) : NaN;
+    var cutoff = isFinite(start) ? start - 60000 : null;
+    if (cutoff != null && Date.now() >= cutoff) {
+      if (hit.row.lastPre != null) hit.row.pA = hit.row.lastPre;
+      hit.row.frozen = true;
+    } else {
+      hit.row.pA = priceA;
+      hit.row.lastPre = priceA;
+      hit.row.frozen = false;
+    }
     window.PM_LIVE.ok = true;
     window.PM_LIVE.at = new Date().toISOString();
     window.PM_LIVE.source = 'clob-ws';
