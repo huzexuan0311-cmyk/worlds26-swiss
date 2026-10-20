@@ -5276,8 +5276,8 @@ body { font-size: 16px; }
     var a = TEAM_DATA[teamA];
     var b = TEAM_DATA[teamB];
     if (!a || !b) return [ratingA, ratingB];
-    var la = a.region;
-    var lb = b.region;
+    var la = a.region || a.league;
+    var lb = b.region || b.league;
     var ra = ratingA;
     var rb = ratingB;
     if (top[lb] && tau[la] != null) ra += tau[la] * 400;
@@ -5323,7 +5323,7 @@ body { font-size: 16px; }
         if (!match.decided) return;
         var pA = probabilities[match.id].a;
         var expectedForA = pA;
-        var k = match.format === 'BO3' ? 24 : 18;
+        var k = match.format === 'BO3' || match.format === 'BO5' ? 24 : 18;
         var delta;
         if (match.winner === match.a) {
           delta = k * (1 - expectedForA);
@@ -5371,7 +5371,7 @@ body { font-size: 16px; }
   <script>
 (function (root) {
   'use strict';
-  /* Per-map Bradley-Terry ratings, fitted on 2,467 completed 2026 maps
+  /* Per-map Bradley-Terry ratings, fitted on 2,213 completed 2026 maps
      (LPL/LCK/LEC/LCS/CBLOL/LCP + MSI/First Stand/EWC/Worlds Play-In).
      IG games before 2026-07-21 are excluded entirely.
      Time decay half-life 220d; ridge lambda 1; no GPR prior.
@@ -7235,13 +7235,17 @@ body { font-size: 16px; }
     var meta = window.COMBINED_META || {};
     var bt = window.BT_RATINGS || {};
     var current = probState ? probState.ratings : MODEL.baseRatings();
-    var rows = MODEL.allBreakdowns().slice().sort(function (a, b) {
-      return (current[b.teamId] || 0) - (current[a.teamId] || 0);
+    var rows = MODEL.allBreakdowns().slice();
+    rows.sort(function (a, b) {
+      var ea = effectiveRating(a.teamId, current[a.teamId] || 0);
+      var eb = effectiveRating(b.teamId, current[b.teamId] || 0);
+      return eb - ea;
     });
     var tableRows = rows.map(function (row, index) {
       var team = TEAM[row.teamId];
       var cur = Math.round(current[row.teamId]);
       var combo = combined[row.teamId];
+      var eff = effectiveRating(row.teamId, current[row.teamId] || 0);
       var delta = combo == null ? 0 : Math.round(cur - combo);
       return '<tr data-team="' + row.teamId + '">' +
         '<td class="model-table__rank mono">' + pad2(index + 1) + '</td>' +
@@ -7252,6 +7256,7 @@ body { font-size: 16px; }
         '<td class="model-table__base mono">' + Math.round(row.rating) + '</td>' +
         '<td class="model-table__base mono" title="三个 logit 的 stacking 结果">' +
           (combo == null ? '—' : Math.round(combo)) + '</td>' +
+        '<td class="model-table__base mono" title="原始当前分 + 赛区 τ × 400">' + Math.round(eff) + '</td>' +
         '<td class="model-table__rating mono">' + cur + '<i class="' + (delta >= 0 ? 'is-up' : 'is-down') + '">' +
           (delta >= 0 ? '+' + delta : delta) + '</i></td>' +
       '</tr>';
@@ -7273,7 +7278,7 @@ body { font-size: 16px; }
       '</div>' +
       '<div class="model__table-wrap">' +
         '<table class="model-table">' +
-          '<thead><tr><th>#</th><th>战队</th><th>GPR 基准</th><th>逐地图 BT</th><th>启发式</th><th>综合</th><th>当前</th></tr></thead>' +
+          '<thead><tr><th># 有效</th><th>战队</th><th>GPR 基准</th><th>逐地图 BT</th><th>启发式</th><th>综合</th><th>跨区有效</th><th>当前</th></tr></thead>' +
           '<tbody>' + tableRows + '</tbody>' +
         '</table>' +
       '</div>' +
@@ -7360,11 +7365,16 @@ body { font-size: 16px; }
     }
     var rows = MODEL.allBreakdowns();
     var current = probState ? probState.ratings : MODEL.baseRatings();
-    rows.sort(function (a, b) { return current[b.teamId] - current[a.teamId]; });
+    rows.sort(function (a, b) {
+      var ea = effectiveRating(a.teamId, current[a.teamId] || 0);
+      var eb = effectiveRating(b.teamId, current[b.teamId] || 0);
+      return eb - ea;
+    });
 
     var tableRows = rows.map(function (row, index) {
       var team = TEAM[row.teamId];
       var cur = Math.round(current[row.teamId]);
+      var eff = effectiveRating(row.teamId, current[row.teamId] || 0);
       var delta = cur - Math.round(row.rating);
       var deltaText = delta === 0 ? '±0' : (delta > 0 ? '+' + delta : String(delta));
       var domesticTitle = '原始 ' + Math.round(row.rawDomesticRate * 100) + '% · 对手加权 Q% ' +
@@ -7385,6 +7395,7 @@ body { font-size: 16px; }
         '<td>' + Math.round(row.recent * 100) + '%</td>' +
         '<td class="model-table__intl">' + internationalLabel(MODEL.TEAM_DATA[row.teamId]) + '</td>' +
         '<td class="model-table__base mono" title="Riot Global Power Ranking 2026-10: ' + row.riotPoints + '">' + Math.round(row.base) + '</td>' +
+        '<td class="model-table__base mono" title="原始当前分 + 赛区 τ × 400">' + Math.round(eff) + '</td>' +
         '<td class="model-table__rating mono">' + cur + '<i class="' + (delta >= 0 ? 'is-up' : 'is-down') + '">' + deltaText + '</i></td>' +
       '</tr>';
     }).join('');
@@ -7422,7 +7433,7 @@ body { font-size: 16px; }
       '</div>' +
       '<div class="model__table-wrap">' +
         '<table class="model-table">' +
-          '<thead><tr><th>#</th><th>战队</th><th>2026 联赛*</th><th>对手均分</th><th>季后赛</th><th>近期</th><th>FST / MSI / EWC</th><th>基准</th><th>当前</th></tr></thead>' +
+          '<thead><tr><th># 有效</th><th>战队</th><th>2026 联赛*</th><th>对手均分</th><th>季后赛</th><th>近期</th><th>FST / MSI / EWC</th><th>基准</th><th>跨区有效</th><th>当前</th></tr></thead>' +
           '<tbody>' + tableRows + '</tbody>' +
         '</table>' +
       '</div>' +
