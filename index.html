@@ -544,40 +544,59 @@ body::-webkit-scrollbar-thumb {
   animation: pulseDot 2.2s ease-in-out infinite;
 }
 
-.board-mode {
+.viewswitch {
   display: flex;
-  justify-content: flex-end;
-  gap: 2px;
-  margin-top: 8px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  background: linear-gradient(100deg, rgba(9, 42, 108, 0.7), rgba(3, 16, 46, 0.6));
 }
 
-.board-mode__btn {
+.viewswitch__label {
+  margin-right: 4px;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: var(--dim);
+}
+
+.viewswitch__btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 9px;
+  justify-content: center;
+  gap: 7px;
+  min-width: 132px;
+  padding: 9px 18px;
   border: 1px solid var(--line-soft);
-  background: rgba(3, 20, 56, 0.45);
-  color: var(--dim);
-  font-family: var(--font-mono);
-  font-size: 8px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  background: rgba(3, 20, 56, 0.5);
+  color: var(--mist);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
   cursor: pointer;
+  transition: border-color 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease);
 }
 
-.board-mode__btn.is-active {
-  border-color: rgba(111, 226, 255, 0.65);
-  background: rgba(28, 91, 190, 0.4);
+.viewswitch__btn:hover {
+  border-color: rgba(111, 226, 255, 0.5);
   color: var(--white);
 }
 
+.viewswitch__btn.is-active {
+  border-color: rgba(111, 226, 255, 0.8);
+  background: linear-gradient(180deg, rgba(41, 119, 235, 0.65), rgba(13, 52, 128, 0.65));
+  color: var(--white);
+  box-shadow: inset 0 0 18px rgba(70, 190, 255, 0.14);
+}
+
 .board-mode__live {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--cyan);
-  box-shadow: 0 0 7px var(--cyan);
+  box-shadow: 0 0 8px var(--cyan);
 }
 
 /* ---------- 7. rail ---------- */
@@ -3947,6 +3966,33 @@ body::-webkit-scrollbar-thumb {
   }
 }
 
+/* ---------- readability pass ---------- */
+.team__name { font-size: 9.5px; }
+.team__rec { font-size: 7.5px; }
+.match__meta-mono { font-size: 8px; }
+.match__market { font-size: 8px; }
+.match__hint { font-size: 8px; }
+.match__verdict { font-size: 9px; }
+.round__top { font-size: 8px; }
+.round__round { font-size: 8.5px; }
+.pool__note { font-size: 9.5px; }
+.pool__count { font-size: 7.5px; }
+.final__sub { font-size: 8px; }
+.final__note { font-size: 8.5px; }
+.qslot__rec { font-size: 9px; }
+.eyebrow, .section-label { font-size: 9px; }
+.console__hint { font-size: 11px; }
+.stat span { font-size: 10px; }
+.stat em { font-size: 7px; }
+.btn { font-size: 11px; }
+
+@media (max-width: 720px) {
+  .viewswitch { flex-wrap: wrap; }
+  .viewswitch__btn { flex: 1 1 0; min-width: 0; padding: 9px 10px; }
+  .team__name { font-size: 10px; }
+}
+
+
 </style>
 </head>
 <body>
@@ -4009,11 +4055,13 @@ body::-webkit-scrollbar-thumb {
         <span class="console__dot" aria-hidden="true"></span>
         <span id="pick-hint">拖动队名至对阵卡 · 点击亦可</span>
       </p>
-      <div class="board-mode" role="group" aria-label="看板模式">
-        <button type="button" class="board-mode__btn is-active" data-board-mode="predict">我的预测</button>
-        <button type="button" class="board-mode__btn" data-board-mode="live">实时赛果 <i class="board-mode__live"></i></button>
-      </div>
     </section>
+
+    <div class="viewswitch" role="group" aria-label="看板模式">
+      <span class="viewswitch__label mono">VIEW</span>
+      <button type="button" class="viewswitch__btn is-active" data-board-mode="predict">我的预测</button>
+      <button type="button" class="viewswitch__btn" data-board-mode="live">实时赛果 <i class="board-mode__live"></i></button>
+    </div>
 
     <div class="railbar" id="railbar">
       <div class="railbar__inner">
