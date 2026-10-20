@@ -3026,6 +3026,59 @@ body::-webkit-scrollbar-thumb {
   width: min(1060px, calc(100vw - 28px));
 }
 
+.modal--results {
+  width: min(860px, calc(100vw - 28px));
+}
+
+.results-list {
+  margin-top: 18px;
+}
+
+.results-list h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--cyan);
+  text-transform: uppercase;
+}
+
+.results-list ul {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.results-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 7px;
+  border: 1px solid var(--line-soft);
+  font-size: 9px;
+  color: var(--mist);
+}
+
+.results-list li b {
+  color: var(--white);
+  font-weight: 500;
+}
+
+.results-list li em {
+  margin-left: auto;
+  font-style: normal;
+  color: var(--dim);
+  font-size: 8px;
+}
+
+.results-list li.results-empty {
+  color: var(--dim);
+  border-style: dashed;
+}
+
 .modal--share {
   width: min(560px, calc(100vw - 28px));
 }
@@ -3926,6 +3979,10 @@ body::-webkit-scrollbar-thumb {
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.8 13.2V9.4M6.2 13.2V5.6M9.6 13.2V7.6M13 13.2V2.8"/><path d="M2 2.4h12"/></svg>
             <span>模型</span>
           </button>
+          <button class="btn" type="button" id="btn-results" aria-haspopup="dialog" aria-label="查看实际赛果和实时 Elo">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13V8M8 13V3M13 13V6"/><path d="M2 13.5h12"/></svg>
+            <span>赛果</span>
+          </button>
           <button class="btn" type="button" id="btn-rules" aria-haspopup="dialog" aria-label="查看赛制">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2.5h7.5A2.5 2.5 0 0 1 13 5v8.5H5.5A2.5 2.5 0 0 1 3 11V2.5Z"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3"/></svg>
             <span>赛制</span>
@@ -4129,6 +4186,19 @@ body::-webkit-scrollbar-thumb {
       <p class="model-tools__note">把系列赛概率向 50/50 收缩。0% = 原始模型；越高越容易爆冷。2025 Worlds Polymarket 36 个系列赛：热门平均隐含概率 72.2%，实际胜率 69.4%，Brier 最优收缩约 7.6%——可先点 8% 预设。样本仅一届，别把它当成完整历届统计。</p>
     </div>
     <div class="modal__body" id="model-body"></div>
+  </dialog>
+
+  <dialog class="modal modal--results" id="results-dialog" aria-labelledby="results-title">
+    <div class="modal__head">
+      <div>
+        <span class="eyebrow">ACTUAL RESULTS · LIVE ELO</span>
+        <h2 class="modal__title" id="results-title">实际赛果</h2>
+      </div>
+      <button class="modal__close" type="button" data-close aria-label="关闭">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+    <div class="modal__body" id="results-body"></div>
   </dialog>
 
   <dialog class="modal modal--share" id="share-dialog" aria-labelledby="share-title">
@@ -5283,6 +5353,18 @@ body::-webkit-scrollbar-thumb {
     'Invictus Gaming': 'IG'
   };
   root.PM_LIVE = { ok: false, at: null, error: null, source: 'snapshot' };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+  <script>
+(function (root) {
+  'use strict';
+  /* Actual Worlds 2026 results snapshot. Empty until the first completed match.
+     Updated by GitHub Actions; this file never changes the prediction state. */
+  root.RESULTS_2026 = {
+    updatedAt: null,
+    matches: []
+  };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -6999,6 +7081,73 @@ body::-webkit-scrollbar-thumb {
       '</p>';
   }
 
+  function trackerProbability(a, b, bo) {
+    var base = window.BT_RATINGS || {};
+    var ra = base[a] != null ? base[a] : 1500;
+    var rb = base[b] != null ? base[b] : 1500;
+    var ta = TEAM[a] ? TEAM[a].region : '';
+    var tb = TEAM[b] ? TEAM[b].region : '';
+    var tau = window.TOP_LEAGUE_TAU || {};
+    var top = window.TOP_LEAGUES || { LPL: true, LCK: true };
+    if (top[tb] && tau[ta] != null) ra += tau[ta] * 400;
+    if (top[ta] && tau[tb] != null) rb += tau[tb] * 400;
+    var p = 1 / (1 + Math.exp((rb - ra) / 400));
+    if (bo >= 5) p = p * p * p * (10 - 15 * p + 6 * p * p);
+    else if (bo === 3) p = p * p * (3 - 2 * p);
+    return p;
+  }
+
+  function renderResultsBody() {
+    var data = window.RESULTS_2026 || { matches: [] };
+    var matches = (data.matches || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+    var base = window.BT_RATINGS || MODEL.baseRatings();
+    matches = matches.filter(function (m) { return base[m.a] != null && base[m.b] != null; });
+    var live = {};
+    var rec = {};
+    Object.keys(base).forEach(function (id) {
+      live[id] = base[id];
+      rec[id] = { w: 0, l: 0 };
+    });
+    matches.forEach(function (m) {
+      if (!live[m.a] || !live[m.b] || !m.winner) return;
+      var p = trackerProbability(m.a, m.b, Number(m.bo) || 1);
+      var k = (Number(m.bo) || 1) >= 3 ? 24 : 18;
+      var aWon = m.winner === m.a;
+      var delta = k * ((aWon ? 1 : 0) - p);
+      live[m.a] = Math.max(1000, Math.min(2600, live[m.a] + delta));
+      live[m.b] = Math.max(1000, Math.min(2600, live[m.b] - delta));
+      rec[m.a][aWon ? 'w' : 'l'] += 1;
+      rec[m.b][aWon ? 'l' : 'w'] += 1;
+    });
+    var rows = Object.keys(live).sort(function (a, b) { return live[b] - live[a]; }).map(function (id, i) {
+      var d = Math.round(live[id] - base[id]);
+      return '<tr data-team="' + id + '">' +
+        '<td class="model-table__rank mono">' + pad2(i + 1) + '</td>' +
+        '<td class="model-table__team">' + teamLogo(id, true) +
+          '<span><b>' + esc(TEAM[id].code) + '</b><i>' + esc(TEAM[id].region + ' · ' + TEAM[id].name) + '</i></span></td>' +
+        '<td class="model-table__base mono">' + rec[id].w + '–' + rec[id].l + '</td>' +
+        '<td class="model-table__rating mono">' + Math.round(live[id]) +
+          '<i class="' + (d >= 0 ? 'is-up' : 'is-down') + '">' + (d >= 0 ? '+' + d : d) + '</i></td>' +
+      '</tr>';
+    }).join('');
+    var list = matches.length ? matches.map(function (m) {
+      return '<li><span class="mono">' + esc(m.date || '') + '</span><b>' + esc(m.a) + ' ' +
+        (m.scoreA != null ? m.scoreA : '?') + '–' + (m.scoreB != null ? m.scoreB : '?') + ' ' + esc(m.b) + '</b>' +
+        '<em>' + esc(m.event || '') + '</em></li>';
+    }).join('') : '<li class="results-empty">还没有已完成比赛。比赛开始后，这里会自动更新。</li>';
+    dom.resultsBody.innerHTML =
+      '<p class="model__intro">实际赛果与你的预测完全分离。这里只读 lolesports 已完成的比赛，并用赛前 BT 基础分做 <b>LIVE ELO</b> 动态更新；不会改你的 picks，也不是重新训练的 BT。</p>' +
+      '<div class="model__meta"><p><b>更新时间</b> ' + esc(data.updatedAt || '尚未更新') + ' · <b>已完成</b> ' + matches.length + ' 场</p>' +
+      '<p><b>口径</b> BO1 K=18 / BO3 K=24；分数仅作赛中动态参考，正式 BT 排名保持赛前冻结。</p></div>' +
+      '<div class="model__table-wrap"><table class="model-table"><thead><tr><th>#</th><th>战队</th><th>实际战绩</th><th>LIVE ELO</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<div class="results-list"><h3>已完成比赛</h3><ul>' + list + '</ul></div>';
+  }
+
+  function openResultsDialog() {
+    renderResultsBody();
+    openDialog(dom.resultsDialog);
+  }
+
   function openModelDialog() {
     renderModelBody();
     openDialog(dom.modelDialog);
@@ -7517,6 +7666,7 @@ body::-webkit-scrollbar-thumb {
     });
 
     dom.btnModel.addEventListener('click', openModelDialog);
+    if (dom.btnResults) dom.btnResults.addEventListener('click', openResultsDialog);
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-model-mode]'), function (button) {
       button.addEventListener('click', function () {
@@ -7735,6 +7885,7 @@ body::-webkit-scrollbar-thumb {
     dom.btnSim = document.getElementById('btn-sim');
     dom.btnSimKo = document.getElementById('btn-sim-ko');
     dom.btnModel = document.getElementById('btn-model');
+    dom.btnResults = document.getElementById('btn-results');
     dom.btnRules = document.getElementById('btn-rules');
     dom.btnShare = document.getElementById('btn-share');
     dom.btnReset = document.getElementById('btn-reset');
@@ -7744,6 +7895,8 @@ body::-webkit-scrollbar-thumb {
     dom.rulesDialog = document.getElementById('rules-dialog');
     dom.modelDialog = document.getElementById('model-dialog');
     dom.modelBody = document.getElementById('model-body');
+    dom.resultsDialog = document.getElementById('results-dialog');
+    dom.resultsBody = document.getElementById('results-body');
     dom.shareDialog = document.getElementById('share-dialog');
     dom.shareInput = document.getElementById('share-input');
     dom.shareCopy = document.getElementById('share-copy');
