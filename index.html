@@ -5474,6 +5474,7 @@ body { font-size: 16px; }
   };
   root.PM_API = '';
   root.PM_WS_URL = 'wss://ws-subscriptions-clob.polymarket.com/ws/market';
+  root.PM_HISTORY_API = 'https://clob.polymarket.com/prices-history';
   root.PM_TEAM_CODES = {
     'Bilibili Gaming': 'BLG',
     'Movistar KOI': 'MKOI',
@@ -6351,6 +6352,33 @@ body { font-size: 16px; }
       if (marketSocketTimer) window.clearTimeout(marketSocketTimer);
       marketSocketTimer = window.setTimeout(startMarketSocket, 5000);
     };
+  }
+
+  function refreshFrozenMarket() {
+    if (!window.PM_R1_2026 || !window.PM_HISTORY_API) return;
+    var now = Date.now();
+    window.PM_R1_2026.forEach(function (row) {
+      if (!row.tokens || !row.start || row.historyChecked) return;
+      var start = Date.parse(row.start);
+      if (!isFinite(start) || now < start - 60000) return;
+      row.historyChecked = true;
+      var end = Math.floor((start - 60000) / 1000);
+      var begin = end - 180;
+      var url = window.PM_HISTORY_API + '?market=' + encodeURIComponent(row.tokens[0]) + '&startTs=' + begin + '&endTs=' + end + '&fidelity=1';
+      fetch(url, { cache: 'no-store' }).then(function (res) {
+        if (!res.ok) throw new Error('history ' + res.status);
+        return res.json();
+      }).then(function (data) {
+        var h = data && data.history;
+        if (!Array.isArray(h) || !h.length) return;
+        var price = Number(h[h.length - 1].p);
+        if (!isFinite(price)) return;
+        row.pA = price;
+        row.lastPre = price;
+        row.frozen = true;
+        updateMarketBadges();
+      }).catch(function () { /* keep WS/static fallback */ });
+    });
   }
 
   function refreshMarket() {
@@ -8425,7 +8453,9 @@ body { font-size: 16px; }
     refreshMarket();
     startMarketSocket();
     refreshResults();
+    refreshFrozenMarket();
     window.setInterval(refreshMarket, 60000);
+    window.setInterval(refreshFrozenMarket, 60000);
     window.setInterval(refreshResults, 60000);
     if (hashState) showToast('已载入分享的预测');
   }
