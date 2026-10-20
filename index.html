@@ -5361,6 +5361,7 @@ body::-webkit-scrollbar-thumb {
   'use strict';
   /* Actual Worlds 2026 results snapshot. Empty until the first completed match.
      Updated by GitHub Actions; this file never changes the prediction state. */
+  root.RESULTS_API = 'https://vercel-seven-opal-76.vercel.app/api/results';
   root.RESULTS_2026 = {
     updatedAt: "2026-10-20T13:35:52.642Z",
     matches: [
@@ -7210,6 +7211,18 @@ body::-webkit-scrollbar-thumb {
       '<div class="results-list"><h3>已完成比赛</h3><ul>' + list + '</ul></div>';
   }
 
+  function refreshResults() {
+    if (!window.RESULTS_API || location.protocol === 'file:') return;
+    fetch(window.RESULTS_API, { cache: 'no-store' }).then(function (res) {
+      if (!res.ok) throw new Error('results api ' + res.status);
+      return res.json();
+    }).then(function (data) {
+      if (!data || !Array.isArray(data.matches)) return;
+      window.RESULTS_2026 = { updatedAt: data.updatedAt || new Date().toISOString(), matches: data.matches };
+      if (dom.resultsDialog && dom.resultsDialog.open) renderResultsBody();
+    }).catch(function () { /* static snapshot fallback */ });
+  }
+
   function openResultsDialog() {
     renderResultsBody();
     openDialog(dom.resultsDialog);
@@ -8085,7 +8098,9 @@ body::-webkit-scrollbar-thumb {
     renderAll({ freshRound: model.activeRound });
     refreshMarket();
     startMarketSocket();
+    refreshResults();
     window.setInterval(refreshMarket, 60000);
+    window.setInterval(refreshResults, 60000);
     if (hashState) showToast('已载入分享的预测');
   }
 
