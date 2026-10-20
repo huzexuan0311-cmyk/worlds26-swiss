@@ -4036,6 +4036,73 @@ body { font-size: 16px; }
 .final__sub { font-size: 9.5px; }
 .console__hint { font-size: 12px; }
 
+/* ---------- roster audit ---------- */
+.lineup-audit {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.lineup-audit__head h3 {
+  margin: 4px 0 6px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-style: italic;
+  color: var(--white);
+}
+
+.lineup-audit__head p {
+  margin: 0 0 10px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--dim);
+}
+
+.lineup-audit__table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.lineup-audit__table th {
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(13, 44, 106, 0.4);
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  letter-spacing: 0.08em;
+  color: var(--dim);
+  text-align: left;
+}
+
+.lineup-audit__table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(126, 184, 255, 0.08);
+  vertical-align: top;
+  color: var(--mist);
+}
+
+.lineup-audit__players {
+  color: var(--white) !important;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  white-space: normal;
+}
+
+.lineup-audit__note {
+  max-width: 330px;
+  font-size: 9px;
+  line-height: 1.45;
+  color: var(--dim);
+}
+
+.lineup-audit__foot {
+  margin-top: 8px;
+  font-size: 8.5px;
+  color: var(--faint);
+}
+
 
 </style>
 </head>
@@ -5507,6 +5574,515 @@ body { font-size: 16px; }
     updatedAt: null,
     matches: []
   };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+  <script>
+(function (root) {
+  'use strict';
+  root.LINEUPS_2026 = {
+  "meta": {
+    "source": "Oracle's Elixir 2026-10-18",
+    "note": "阵容审计字段仅展示，不参与默认胜率；BT 仍是团队级模型。"
+  },
+  "teams": {
+    "AL": {
+      "league": "LPL",
+      "last": [
+        "Breathe",
+        "Hope",
+        "Kael",
+        "Shanks",
+        "Tarzan"
+      ],
+      "date": "2026-09-13 12:03:56",
+      "changes": [
+        {
+          "date": "2026-07-23 09:14:40",
+          "players": [
+            "Breathe",
+            "Hope",
+            "Kael",
+            "Shanks",
+            "Tarzan"
+          ]
+        }
+      ]
+    },
+    "BLG": {
+      "league": "LPL",
+      "last": [
+        "Bin",
+        "Knight",
+        "ON",
+        "Viper",
+        "Xun"
+      ],
+      "date": "2026-09-13 12:03:56",
+      "changes": [
+        {
+          "date": "2026-07-23 12:51:10",
+          "players": [
+            "Knight",
+            "ON",
+            "Viper",
+            "Wenbo",
+            "Xun"
+          ]
+        },
+        {
+          "date": "2026-08-15 13:09:39",
+          "players": [
+            "Flandre",
+            "Knight",
+            "ON",
+            "Viper",
+            "Xun"
+          ]
+        },
+        {
+          "date": "2026-08-21 12:34:16",
+          "players": [
+            "Bin",
+            "Knight",
+            "ON",
+            "Viper",
+            "Xun"
+          ]
+        }
+      ]
+    },
+    "CFO": {
+      "league": "LCP",
+      "last": [
+        "Doggo",
+        "Kino",
+        "Pout",
+        "Rest",
+        "Shad0w"
+      ],
+      "date": "2026-08-30 10:26:53",
+      "changes": [
+        {
+          "date": "2026-04-18 09:26:51",
+          "players": [
+            "Doggo",
+            "Kino",
+            "Pout",
+            "Rest",
+            "Shad0w"
+          ]
+        }
+      ]
+    },
+    "DK": {
+      "league": "LCK",
+      "last": [
+        "Career",
+        "Lucid",
+        "ShowMaker",
+        "Siwoo",
+        "Smash"
+      ],
+      "date": "2026-09-06 11:11:44",
+      "changes": [
+        {
+          "date": "2026-05-31 10:17:32",
+          "players": [
+            "Career",
+            "Lucid",
+            "ShowMaker",
+            "Siwoo",
+            "Smash"
+          ]
+        },
+        {
+          "date": "2026-07-21 07:07:49",
+          "players": [
+            "Garden",
+            "Jaehyuk",
+            "Loopy",
+            "Solid",
+            "Wayne"
+          ]
+        },
+        {
+          "date": "2026-07-30 10:17:39",
+          "players": [
+            "Career",
+            "Lucid",
+            "ShowMaker",
+            "Siwoo",
+            "Smash"
+          ]
+        }
+      ]
+    },
+    "G2": {
+      "league": "LEC",
+      "last": [
+        "BrokenBlade",
+        "Caps",
+        "Hans Sama",
+        "Labrov",
+        "SkewMond"
+      ],
+      "date": "2026-09-20 17:13:10",
+      "changes": []
+    },
+    "GEN": {
+      "league": "LCK",
+      "last": [
+        "Canyon",
+        "Chovy",
+        "Duro",
+        "Kiin",
+        "Ruler"
+      ],
+      "date": "2026-09-13 08:19:05",
+      "changes": [
+        {
+          "date": "2026-07-27 06:14:55",
+          "players": [
+            "Canyon",
+            "Chovy",
+            "Duro",
+            "Kiin",
+            "Ruler"
+          ]
+        },
+        {
+          "date": "2026-08-03 08:17:00",
+          "players": [
+            "Courage",
+            "Kemish",
+            "Lumos",
+            "MUDAI",
+            "Ripple"
+          ]
+        },
+        {
+          "date": "2026-08-04 09:25:47",
+          "players": [
+            "Canyon",
+            "Chovy",
+            "Duro",
+            "Kiin",
+            "Ruler"
+          ]
+        }
+      ]
+    },
+    "HLE": {
+      "league": "LCK",
+      "last": [
+        "Delight",
+        "Gumayusi",
+        "Kanavi",
+        "Zeka",
+        "Zeus"
+      ],
+      "date": "2026-09-13 08:19:05",
+      "changes": [
+        {
+          "date": "2026-08-13 11:04:48",
+          "players": [
+            "Delight",
+            "Gumayusi",
+            "Kanavi",
+            "Zeka",
+            "Zeus"
+          ]
+        },
+        {
+          "date": "2026-08-15 08:08:03",
+          "players": [
+            "Bluffing",
+            "Gumayusi",
+            "Kanavi",
+            "Zeka",
+            "Zeus"
+          ]
+        },
+        {
+          "date": "2026-08-20 08:07:41",
+          "players": [
+            "Delight",
+            "Gumayusi",
+            "Kanavi",
+            "Zeka",
+            "Zeus"
+          ]
+        }
+      ]
+    },
+    "IG": {
+      "league": "LPL",
+      "last": [
+        "JiaQi",
+        "Meiko",
+        "Rookie",
+        "TheShy",
+        "Wei"
+      ],
+      "date": "2026-09-19 12:09:59",
+      "changes": [
+        {
+          "date": "2026-05-23 12:38:43",
+          "players": [
+            "Breathe",
+            "JiaQi",
+            "Meiko",
+            "Renard",
+            "Wei"
+          ]
+        },
+        {
+          "date": "2026-07-25 09:20:27",
+          "players": [
+            "Assum",
+            "Meiko",
+            "Rookie",
+            "TheShy",
+            "Wei"
+          ]
+        },
+        {
+          "date": "2026-08-16 10:11:59",
+          "players": [
+            "JiaQi",
+            "Meiko",
+            "Rookie",
+            "TheShy",
+            "Wei"
+          ]
+        }
+      ]
+    },
+    "KC": {
+      "league": "LEC",
+      "last": [
+        "Busio",
+        "Caliste",
+        "Canna",
+        "Yike",
+        "kyeahoo"
+      ],
+      "date": "2026-10-18 19:48:36",
+      "changes": []
+    },
+    "LOS": {
+      "league": "CBLOL",
+      "last": [
+        "Ackerman",
+        "Curse",
+        "Duduhh",
+        "Feisty",
+        "Zest"
+      ],
+      "date": "2026-10-12 23:41:27",
+      "changes": [
+        {
+          "date": "2026-05-03 16:10:33",
+          "players": [
+            "Ackerman",
+            "Curse",
+            "Duduhh",
+            "Feisty",
+            "Zest"
+          ]
+        }
+      ]
+    },
+    "LYON": {
+      "league": "LCS",
+      "last": [
+        "Berserker",
+        "Dhokla",
+        "Inspired",
+        "Isles",
+        "Saint"
+      ],
+      "date": "2026-10-04 23:31:20",
+      "changes": [
+        {
+          "date": "2026-05-24 20:12:10",
+          "players": [
+            "Berserker",
+            "Dhokla",
+            "Inspired",
+            "Isles",
+            "Saint"
+          ]
+        },
+        {
+          "date": "2026-07-25 20:13:30",
+          "players": [
+            "Armao",
+            "Berserker",
+            "Dhokla",
+            "Isles",
+            "Saint"
+          ]
+        },
+        {
+          "date": "2026-08-29 22:53:50",
+          "players": [
+            "Berserker",
+            "Dhokla",
+            "Inspired",
+            "Isles",
+            "Saint"
+          ]
+        }
+      ]
+    },
+    "MKOI": {
+      "league": "LEC",
+      "last": [
+        "Alvaro",
+        "Elyoya",
+        "Jojopyun",
+        "Myrwn",
+        "Supa"
+      ],
+      "date": "2026-09-20 17:13:10",
+      "changes": []
+    },
+    "T1": {
+      "league": "LCK",
+      "last": [
+        "Doran",
+        "Faker",
+        "Keria",
+        "Oner",
+        "Peyz"
+      ],
+      "date": "2026-09-12 08:21:21",
+      "changes": [
+        {
+          "date": "2026-08-14 08:08:00",
+          "players": [
+            "Doran",
+            "Faker",
+            "Keria",
+            "Oner",
+            "Peyz"
+          ]
+        },
+        {
+          "date": "2026-08-17 09:19:35",
+          "players": [
+            "Cloud",
+            "Cypher",
+            "Guti",
+            "Haetae",
+            "Painter"
+          ]
+        },
+        {
+          "date": "2026-08-21 11:24:11",
+          "players": [
+            "Doran",
+            "Faker",
+            "Keria",
+            "Oner",
+            "Peyz"
+          ]
+        }
+      ]
+    },
+    "TES": {
+      "league": "LPL",
+      "last": [
+        "Creme",
+        "JackeyLove",
+        "Tian",
+        "ZUIAN",
+        "Zhuo"
+      ],
+      "date": "2026-09-17 12:10:40",
+      "changes": [
+        {
+          "date": "2026-04-04 07:13:58",
+          "players": [
+            "Creme",
+            "JackeyLove",
+            "Tian",
+            "ZUIAN",
+            "fengyue"
+          ]
+        },
+        {
+          "date": "2026-07-22 11:54:52",
+          "players": [
+            "Creme",
+            "JackeyLove",
+            "Tian",
+            "ZUIAN",
+            "Zhuo"
+          ]
+        }
+      ]
+    },
+    "TLAW": {
+      "league": "LCS",
+      "last": [
+        "CoreJJ",
+        "Josedeodo",
+        "Morgan",
+        "Quid",
+        "Yeon"
+      ],
+      "date": "2026-10-04 23:31:20",
+      "changes": []
+    },
+    "TSW": {
+      "league": "LCP",
+      "last": [
+        "Bie",
+        "Dire",
+        "Eddie",
+        "Hizto",
+        "Pun"
+      ],
+      "date": "2026-08-30 10:26:53",
+      "changes": [
+        {
+          "date": "2026-01-30 07:01:47",
+          "players": [
+            "Bie",
+            "Dire",
+            "Eddie",
+            "Hiro02",
+            "Hizto"
+          ]
+        },
+        {
+          "date": "2026-02-01 06:18:14",
+          "players": [
+            "Bie",
+            "Dire",
+            "Eddie",
+            "Hizto",
+            "Pun"
+          ]
+        }
+      ]
+    }
+  },
+  "notes": {
+    "IG": "JiaQi 为名单首发；Assum 在世界赛名单/轮换。阵容偏移未建模，避免用少量对局推断强弱。",
+    "BLG": "最后实际阵容为 Bin / Knight / ON / Viper / Xun；Flandre 仅 8/15 出场。按你的要求暂不处理 BLG。",
+    "LYON": "Inspired 为最后首发；Armao 仅在 7/25–8/29 临时轮换。阵容偏移未建模。",
+    "AL": "7/23 起 Breathe / Hope / Kael / Shanks / Tarzan；与当前断点基本一致。",
+    "TES": "7/22 起 Zhuo；与当前断点一致。",
+    "T1": "Oner 首发；Painter 仅替补出场。",
+    "HLE": "Delight 首发；Bluffing 仅替补出场。",
+    "GEN": "主阵容稳定；KeSPA Cup 学院队比赛未进入 BT。",
+    "DK": "主阵容稳定；KeSPA Cup 学院队比赛未进入 BT。"
+  }
+};
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -7390,14 +7966,42 @@ body { font-size: 16px; }
         '<a href="https://huggingface.co/datasets/gptilt/lol-esports-matches" target="_blank" rel="noreferrer">逐地图数据</a></p>';
   }
 
+  function renderLineupAudit() {
+    var data = window.LINEUPS_2026;
+    if (!data || !data.teams) return '';
+    var focus = ['IG', 'BLG', 'LYON', 'AL', 'TES', 'T1', 'HLE'];
+    var rows = focus.map(function (id) {
+      var item = data.teams[id];
+      if (!item) return '';
+      var note = data.notes[id] || '';
+      return '<tr data-team="' + id + '"><td class="model-table__team">' + teamLogo(id, true) +
+        '<span><b>' + esc(TEAM[id].code) + '</b><i>' + esc(TEAM[id].region + ' · ' + TEAM[id].name) + '</i></span></td>' +
+        '<td class="lineup-audit__players">' + esc(item.last.join(' / ')) + '</td>' +
+        '<td class="model-table__base mono">' + esc(item.date.slice(0, 10)) + '</td>' +
+        '<td class="lineup-audit__note">' + esc(note) + '</td></tr>';
+    }).join('');
+    return '<section class="lineup-audit">' +
+      '<header class="lineup-audit__head"><span class="section-label">ROSTER AUDIT</span><h3>阵容审计</h3>' +
+      '<p>仅展示实际出场与轮换，<b>不参与默认胜率</b>；BT 仍是团队级模型。来源：' + esc(data.meta.source) + '</p></header>' +
+      '<div class="model__table-wrap"><table class="lineup-audit__table"><thead><tr><th>战队</th><th>最后实际阵容</th><th>日期</th><th>备注</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      '<p class="lineup-audit__foot">' + esc(data.meta.note) + '</p></section>';
+  }
+
+  function appendLineupAudit() {
+    if (!dom.modelBody || !window.LINEUPS_2026) return;
+    dom.modelBody.insertAdjacentHTML('beforeend', renderLineupAudit());
+  }
+
   function renderModelBody() {
     updateModelModeButtons();
     if (modelMode === 'combined' && window.COMBINED_RATINGS) {
       renderCombinedModelBody();
+      appendLineupAudit();
       return;
     }
     if (modelMode === 'bt' && window.BT_RATINGS) {
       renderBtModelBody();
+      appendLineupAudit();
       return;
     }
     var rows = MODEL.allBreakdowns();
@@ -7482,6 +8086,7 @@ body { font-size: 16px; }
         '<a href="https://en.wikipedia.org/wiki/2026_LCK_season" target="_blank" rel="noreferrer">LCK 2026</a> · ' +
         '<a href="https://en.wikipedia.org/wiki/2026_LPL_season" target="_blank" rel="noreferrer">LPL 2026</a>' +
       '</p>';
+    appendLineupAudit();
   }
 
   function trackerProbability(a, b, bo) {
