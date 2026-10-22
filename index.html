@@ -4103,6 +4103,24 @@ body { font-size: 16px; }
   color: var(--faint);
 }
 
+.viewswitch__status {
+  margin-left: auto;
+  padding: 6px 10px;
+  border: 1px solid rgba(111, 226, 255, 0.22);
+  color: var(--dim);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .viewswitch__status {
+    flex: 1 1 100%;
+    margin-left: 0;
+    text-align: right;
+  }
+}
+
 
 </style>
 </head>
@@ -4172,6 +4190,7 @@ body { font-size: 16px; }
       <span class="viewswitch__label mono">VIEW</span>
       <button type="button" class="viewswitch__btn is-active" data-board-mode="predict">我的预测</button>
       <button type="button" class="viewswitch__btn" data-board-mode="live">实时赛果 <i class="board-mode__live"></i></button>
+      <span class="viewswitch__status mono" id="live-status">等待连接</span>
     </div>
 
     <div class="railbar" id="railbar">
@@ -6898,6 +6917,21 @@ body { font-size: 16px; }
     return marketForPair(match.a, match.b);
   }
 
+  function liveClock(iso) {
+    try {
+      return new Date(iso).toLocaleTimeString('zh-CN', { hour12: false, timeZone: 'Asia/Hong_Kong' });
+    } catch (err) { return '—'; }
+  }
+
+  function updateLiveStatus() {
+    if (!dom.liveStatus) return;
+    var parts = [];
+    if (window.PM_LIVE && window.PM_LIVE.ok) parts.push('MKT LIVE ' + liveClock(window.PM_LIVE.at));
+    else parts.push('MKT 连接中');
+    if (window.RESULTS_2026 && window.RESULTS_2026.updatedAt) parts.push('赛果 ' + liveClock(window.RESULTS_2026.updatedAt));
+    dom.liveStatus.textContent = parts.join(' · ');
+  }
+
   function updateMarketBadges() {
     Array.prototype.forEach.call(document.querySelectorAll('.match[data-round="1"]'), function (card) {
       var teams = (card.getAttribute('data-teams') || '').split(' ');
@@ -6956,6 +6990,7 @@ body { font-size: 16px; }
     window.PM_LIVE.at = new Date().toISOString();
     window.PM_LIVE.source = 'clob-ws';
     updateMarketBadges();
+    updateLiveStatus();
   }
 
   function startMarketSocket() {
@@ -7044,6 +7079,7 @@ body { font-size: 16px; }
       window.PM_LIVE.at = data.capturedAt || new Date().toISOString();
       window.PM_R1_META.capturedAt = data.capturedAt || window.PM_R1_META.capturedAt;
       updateMarketBadges();
+      updateLiveStatus();
     }).catch(function (err) {
       window.PM_LIVE.ok = false;
       window.PM_LIVE.error = String(err);
@@ -8228,6 +8264,7 @@ body { font-size: 16px; }
       window.RESULTS_2026 = { updatedAt: data.updatedAt || new Date().toISOString(), matches: data.matches };
       if (dom.resultsDialog && dom.resultsDialog.open) renderResultsBody();
       if (boardMode === 'live') renderLiveAll();
+      updateLiveStatus();
     }).catch(function () { /* static snapshot fallback */ });
   }
 
@@ -8980,6 +9017,7 @@ body { font-size: 16px; }
     dom.statEliminated = document.getElementById('stat-eliminated');
     dom.statRemaining = document.getElementById('stat-remaining');
     dom.pickHint = document.getElementById('pick-hint');
+    dom.liveStatus = document.getElementById('live-status');
     dom.railbar = document.getElementById('railbar');
     dom.railnav = document.getElementById('railnav');
     dom.railProgress = document.getElementById('rail-progress');
@@ -9126,6 +9164,7 @@ body { font-size: 16px; }
     startMarketSocket();
     refreshResults();
     refreshFrozenMarket();
+    updateLiveStatus();
     window.setInterval(refreshMarket, 60000);
     window.setInterval(refreshFrozenMarket, 60000);
     window.setInterval(refreshResults, 60000);
