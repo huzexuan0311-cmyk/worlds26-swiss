@@ -6881,7 +6881,7 @@ body { font-size: 16px; }
         var foot = card.querySelector('.match__foot');
         if (foot) foot.appendChild(el);
       }
-      el.textContent = 'MKT ' + pct(market.p) + '%';
+      el.textContent = 'MKT ' + marketPct(market.p) + '%';
       el.title = 'Polymarket ' + (market.frozen ? '赛前最后一分钟冻结' : (market.live ? '实时' : '赛前快照')) + ' · ' + (market.meta && market.meta.capturedAt ? market.meta.capturedAt : '');
     });
   }
@@ -7043,6 +7043,11 @@ body { font-size: 16px; }
 
   function pct(value) {
     return Math.round(value * 100);
+  }
+
+  function marketPct(value) {
+    var n = value * 100;
+    return (Math.round(n * 10) / 10).toFixed(1).replace(/\.0$/, '');
   }
 
   function poolNote(pool) {
@@ -7526,7 +7531,7 @@ body { font-size: 16px; }
       '</div>' +
       '<footer class="match__foot">' +
         '<span class="match__meta-mono mono">#' + pad2(match.number) + ' · ' + match.format + '</span>' +
-        (market ? '<span class="match__market mono" title="Polymarket 赛前快照 ' + esc(market.meta.capturedAt) + '">MKT ' + pct(market.p) + '%</span>' : '') +
+        (market ? '<span class="match__market mono" title="Polymarket 赛前快照 ' + esc(market.meta.capturedAt) + '">MKT ' + marketPct(market.p) + '%</span>' : '') +
         foot +
       '</footer>' +
     '</article>';
