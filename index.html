@@ -6856,12 +6856,20 @@ body { font-size: 16px; }
     } catch (err) { return '—'; }
   }
 
+  function liveStamp(iso) {
+    try {
+      var d = new Date(iso);
+      var date = d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit', timeZone: 'Asia/Hong_Kong' });
+      return date + ' ' + liveClock(iso);
+    } catch (err) { return '—'; }
+  }
+
   function updateLiveStatus() {
     if (!dom.liveStatus) return;
     var parts = [];
-    if (window.PM_LIVE && window.PM_LIVE.ok) parts.push('MKT LIVE ' + liveClock(window.PM_LIVE.at));
+    if (window.PM_LIVE && window.PM_LIVE.ok) parts.push('MKT LIVE ' + liveStamp(window.PM_LIVE.at));
     else parts.push('MKT 连接中');
-    if (window.RESULTS_2026 && window.RESULTS_2026.updatedAt) parts.push('赛果 ' + liveClock(window.RESULTS_2026.updatedAt));
+    if (window.RESULTS_2026 && window.RESULTS_2026.updatedAt) parts.push('赛果 ' + liveStamp(window.RESULTS_2026.updatedAt));
     dom.liveStatus.textContent = parts.join(' · ');
   }
 
@@ -6882,7 +6890,7 @@ body { font-size: 16px; }
         if (foot) foot.appendChild(el);
       }
       el.textContent = 'MKT ' + marketPct(market.p) + '%';
-      el.title = 'Polymarket ' + (market.frozen ? '赛前最后一分钟冻结' : (market.live ? '实时' : '赛前快照')) + ' · ' + (market.meta && market.meta.capturedAt ? market.meta.capturedAt : '');
+      el.title = 'Polymarket ' + (market.frozen ? '赛前最后一分钟冻结' : (market.live ? '实时 ' + liveStamp(window.PM_LIVE.at) : '赛前快照 ' + (market.meta && market.meta.capturedAt ? market.meta.capturedAt : '')));
     });
   }
 
