@@ -32,17 +32,23 @@ async function main() {
     const a = teams[0], b = teams[1];
     const ar = (a.result || {}), br = (b.result || {});
     if (ar.gameWins == null || br.gameWins == null) continue;
-    const winner = ar.outcome === 'win' ? a.code : b.code;
+    const bo = (m.strategy && m.strategy.count) || 1;
+    const scoreA = Number(ar.gameWins), scoreB = Number(br.gameWins);
+    const target = bo === 1 ? 1 : (bo === 5 ? 3 : 2);
+    const aWin = ar.outcome === 'win' || scoreA > scoreB;
+    const bWin = br.outcome === 'win' || scoreB > scoreA;
+    if (!aWin && !bWin) continue;
+    if (scoreA < target && scoreB < target) continue;
     const row = {
       id: m.id || e.id,
       date: String(e.startTime).slice(0, 10),
       event: e.blockName || 'Worlds',
-      bo: (m.strategy && m.strategy.count) || 1,
+      bo,
       a: a.code,
       b: b.code,
-      scoreA: ar.gameWins,
-      scoreB: br.gameWins,
-      winner
+      scoreA,
+      scoreB,
+      winner: aWin ? a.code : b.code
     };
     if (!row.id || seen[row.id]) continue;
     seen[row.id] = 1;

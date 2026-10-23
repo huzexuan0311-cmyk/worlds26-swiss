@@ -7302,6 +7302,11 @@ body { font-size: 16px; }
         records[match.winner].w += 1;
         records[match.loser].l += 1;
         played += 1;
+        match.aEnd = ENG.recordLabel(records[match.a].w, records[match.a].l);
+        match.bEnd = ENG.recordLabel(records[match.b].w, records[match.b].l);
+      } else {
+        match.aEnd = match.aStart;
+        match.bEnd = match.bStart;
       }
     });
 
@@ -7349,7 +7354,7 @@ body { font-size: 16px; }
 
   function renderLiveTeam(id, match, score, isWinner, isLoser) {
     var team = TEAM[id];
-    var rec = match.a === id ? match.aStart : match.bStart;
+    var rec = match.a === id ? (match.aEnd || match.aStart) : (match.bEnd || match.bStart);
     var classes = ['team', 'team--live'];
     if (isWinner) classes.push('is-winner');
     if (isLoser) classes.push('is-loser');
