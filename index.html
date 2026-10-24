@@ -4121,6 +4121,21 @@ body { font-size: 16px; }
   }
 }
 
+/* pair-edit mode */
+.round__pair {
+  color: var(--cyan);
+  border-color: rgba(111, 226, 255, 0.45);
+}
+
+.round.is-pairing {
+  outline: 1px dashed rgba(111, 226, 255, 0.35);
+  outline-offset: 3px;
+}
+
+.round.is-pairing .match {
+  cursor: grab;
+}
+
 
 </style>
 </head>
@@ -4686,6 +4701,7 @@ body { font-size: 16px; }
     var r1Matches = config.r1Matches;
     var picks = config.picks || {};
     var seeds = config.seeds || {};
+    var pairings = config.pairings || {};
 
     var records = Object.create(null);
     teamIds.forEach(function (id) {
@@ -4745,6 +4761,29 @@ body { font-size: 16px; }
             pairs: result.pairs,
             rematch: result.rematch
           };
+        });
+      }
+
+      if (roundNumber > 1 && pairings[roundNumber]) {
+        var override = pairings[roundNumber];
+        rawPools.forEach(function (rawPool) {
+          var alt = override[rawPool.record];
+          if (!Array.isArray(alt)) return;
+          var expected = [];
+          rawPool.pairs.forEach(function (pair) { expected.push(pair[0], pair[1]); });
+          var flat = [];
+          var valid = alt.length === rawPool.pairs.length;
+          alt.forEach(function (pair) {
+            if (!valid || !Array.isArray(pair) || pair.length !== 2) { valid = false; return; }
+            flat.push(pair[0], pair[1]);
+          });
+          if (!valid || flat.length !== expected.length) return;
+          var sortedExpected = expected.slice().sort();
+          var sortedFlat = flat.slice().sort();
+          for (var k = 0; k < sortedExpected.length; k++) {
+            if (sortedExpected[k] !== sortedFlat[k]) return;
+          }
+          rawPool.pairs = alt.map(function (pair) { return [pair[0], pair[1]]; });
         });
       }
 
@@ -5544,17 +5583,17 @@ body { font-size: 16px; }
      tokens enable the public CLOB market WebSocket for live updates.
      This file is display-only; it does not change model probabilities. */
   root.PM_R1_2026 = [
-    { a: 'BLG', b: 'MKOI', pA: 0, start: '2026-10-23 19:10:00+00' },
-    { a: 'TSW', b: 'LYON', pA: 0.195, start: '2026-10-24 00:05:00+00' },
-    { a: 'LOS', b: 'T1', pA: 0.0005, start: '2026-10-23 23:15:00+00' },
-    { a: 'HLE', b: 'TES', pA: 1, start: '2026-10-23 18:15:00+00' },
-    { a: 'G2', b: 'DK', pA: 0, start: '2026-10-23 21:10:00+00' },
-    { a: 'AL', b: 'KC', pA: 0, start: '2026-10-23 20:15:00+00' },
-    { a: 'TLAW', b: 'CFO', pA: 0, start: '2026-10-23 22:10:00+00' },
-    { a: 'GEN', b: 'IG', pA: 1, start: '2026-10-23 17:00:00+00' }
+    { a: 'BLG', b: 'MKOI', pA: 0.815, start: '2026-10-24T00:00:00Z', tokens: ['80681350167081345387188830570748285552312548625594614764149183642820220575429','43259706965313394686477024746244743754810950406229193447156278754597380165018'] },
+    { a: 'TSW', b: 'LYON', pA: 0.415, start: '2026-10-23T23:00:00Z', tokens: ['62952148071425524087619205320068634295985136865210538799954468541828485390166','65198542954971072457090006090828270286662357946523093527735544591791843980032'] },
+    { a: 'LOS', b: 'T1', pA: 0.125, start: '2026-10-23T22:00:00Z', tokens: ['29333334019139817447151700116338525061857555894700496774613620253316163641269','32512913109959372635651124100144167376239740641342848502922824921056826792282'] },
+    { a: 'HLE', b: 'TES', pA: 0.785, start: '2026-10-23T21:00:00Z', tokens: ['18724120934765507673671290266127048955936873230517337974714924734525688124106','3746811607983342965144083879627922628914188740904568706745631933422838907140'] },
+    { a: 'G2', b: 'DK', pA: 0.385, start: '2026-10-23T20:00:00Z', tokens: ['25254383287130426656176153294689261022971513354701733211726258646065618778842','47396876078760813133804793491418961115790596215906854630629564623690959183354'] },
+    { a: 'AL', b: 'KC', pA: 0.665, start: '2026-10-23T19:00:00Z', tokens: ['86251960487333944829295436845339778503135448830171904215992256311240482877451','46602514397165613480102220189767438937377959307884575445865556310887371607789'] },
+    { a: 'TLAW', b: 'CFO', pA: 0.715, start: '2026-10-23T18:00:00Z', tokens: ['23856249771973605697778858622586207369848807887907623928269226525886225578276','98214227272775431699728564609922746323189192121700078829614978577051939928927'] },
+    { a: 'GEN', b: 'IG', pA: 0.775, start: '2026-10-23T17:00:00Z', tokens: ['72557937594764320538887838691764854594118877065852846215514308974817657197809','111007383297658799731210891739784511348882665853883919817395863951255605211468'] }
   ];
   root.PM_R1_META = {
-    capturedAt: '2026-10-24T00:35:12.187Z',
+    capturedAt: '2026-10-20T20:56:00+08:00',
     source: 'Polymarket Worlds 2026 Group Stage markets',
     note: '赛前快照；WS 可实时更新，仅显示对照；不参与默认模型。'
   };
@@ -5590,152 +5629,8 @@ body { font-size: 16px; }
      Updated by GitHub Actions; this file never changes the prediction state. */
   root.RESULTS_API = 'https://vercel-seven-opal-76.vercel.app/api/results';
   root.RESULTS_2026 = {
-    updatedAt: "2026-10-24T00:35:12.566Z",
-    matches: [
-      {
-        "id": "115660588583171786",
-        "date": "2026-10-15",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "KC",
-        "b": "C9",
-        "scoreA": 3,
-        "scoreB": 2,
-        "winner": "KC"
-      },
-      {
-        "id": "115660588583040710",
-        "date": "2026-10-15",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "MVK",
-        "b": "FUR",
-        "scoreA": 3,
-        "scoreB": 0,
-        "winner": "MVK"
-      },
-      {
-        "id": "115660588583171790",
-        "date": "2026-10-16",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "KC",
-        "b": "MVK",
-        "scoreA": 3,
-        "scoreB": 0,
-        "winner": "KC"
-      },
-      {
-        "id": "115660588583171794",
-        "date": "2026-10-16",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "FUR",
-        "b": "C9",
-        "scoreA": 3,
-        "scoreB": 1,
-        "winner": "FUR"
-      },
-      {
-        "id": "115660588583171798",
-        "date": "2026-10-17",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "MVK",
-        "b": "FUR",
-        "scoreA": 3,
-        "scoreB": 1,
-        "winner": "MVK"
-      },
-      {
-        "id": "116299649498303884",
-        "date": "2026-10-18",
-        "event": "Play-Ins",
-        "bo": 5,
-        "a": "KC",
-        "b": "MVK",
-        "scoreA": 3,
-        "scoreB": 0,
-        "winner": "KC"
-      },
-      {
-        "id": "115660540726095005",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "IG",
-        "b": "GEN",
-        "scoreA": 0,
-        "scoreB": 1,
-        "winner": "GEN"
-      },
-      {
-        "id": "115660540726095013",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "TES",
-        "b": "HLE",
-        "scoreA": 0,
-        "scoreB": 1,
-        "winner": "HLE"
-      },
-      {
-        "id": "115660540726095019",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "MKOI",
-        "b": "BLG",
-        "scoreA": 1,
-        "scoreB": 0,
-        "winner": "MKOI"
-      },
-      {
-        "id": "115660540726095009",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "KC",
-        "b": "AL",
-        "scoreA": 1,
-        "scoreB": 0,
-        "winner": "KC"
-      },
-      {
-        "id": "115660540726095011",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "DK",
-        "b": "G2",
-        "scoreA": 1,
-        "scoreB": 0,
-        "winner": "DK"
-      },
-      {
-        "id": "115660540726095007",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "TLAW",
-        "b": "CFO",
-        "scoreA": 0,
-        "scoreB": 1,
-        "winner": "CFO"
-      },
-      {
-        "id": "115660540726095015",
-        "date": "2026-10-23",
-        "event": "Swiss",
-        "bo": 1,
-        "a": "LOS",
-        "b": "T1",
-        "scoreA": 0,
-        "scoreB": 1,
-        "winner": "T1"
-      }
-    ]
+    updatedAt: null,
+    matches: []
   };
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -6324,6 +6219,7 @@ body { font-size: 16px; }
   var MODEL_MODE_KEY = 'worlds26-model-mode-v3';
   var modelMode = 'heuristic';
   var boardMode = 'predict';
+  var pairMode = false;
   var drag = null;
   var pendingUndo = null;
   var toastTimer = null;
@@ -6408,13 +6304,14 @@ body { font-size: 16px; }
   function freshState() {
     var seeds = {};
     [2, 3, 4, 5].forEach(function (round) { seeds[round] = randomSeed(); });
-    return { seeds: seeds, picks: { 1: [], 2: [], 3: [], 4: [], 5: [] }, ko: emptyKo() };
+    return { seeds: seeds, picks: { 1: [], 2: [], 3: [], 4: [], 5: [] }, pairings: {}, ko: emptyKo() };
   }
 
   function cloneState() {
-    var copy = { seeds: {}, picks: {}, ko: emptyKo() };
+    var copy = { seeds: {}, picks: {}, pairings: {}, ko: emptyKo() };
     [2, 3, 4, 5].forEach(function (round) { copy.seeds[round] = state.seeds[round]; });
     [1, 2, 3, 4, 5].forEach(function (round) { copy.picks[round] = (state.picks[round] || []).slice(); });
+    copy.pairings = normalizePairings(state.pairings);
     copy.ko.qf = (state.ko && state.ko.qf || []).slice(0, 4);
     copy.ko.sf = (state.ko && state.ko.sf || []).slice(0, 2);
     copy.ko.final = state.ko && state.ko.final ? state.ko.final : null;
@@ -6431,6 +6328,27 @@ body { font-size: 16px; }
       out.sf = out.sf.map(function (_, i) { return typeof raw.sf[i] === 'string' && TEAM[raw.sf[i]] ? raw.sf[i] : null; });
     }
     out.final = typeof raw.final === 'string' && TEAM[raw.final] ? raw.final : null;
+    return out;
+  }
+
+  function normalizePairings(raw) {
+    var out = {};
+    if (!raw || typeof raw !== 'object') return out;
+    [2, 3, 4, 5].forEach(function (round) {
+      var src = raw[round];
+      if (!src || typeof src !== 'object') return;
+      var roundOut = {};
+      Object.keys(src).forEach(function (record) {
+        var pairs = src[record];
+        if (!Array.isArray(pairs)) return;
+        var clean = [];
+        pairs.forEach(function (pair) {
+          if (Array.isArray(pair) && pair.length === 2 && TEAM[pair[0]] && TEAM[pair[1]]) clean.push([pair[0], pair[1]]);
+        });
+        if (clean.length) roundOut[record] = clean;
+      });
+      if (Object.keys(roundOut).length) out[round] = roundOut;
+    });
     return out;
   }
 
@@ -6454,7 +6372,7 @@ body { font-size: 16px; }
         ? list.map(function (id) { return typeof id === 'string' && TEAM[id] ? id : null; })
         : [];
     }
-    return { seeds: seeds, picks: picks, ko: normalizeKo(raw.k || raw.ko) };
+    return { seeds: seeds, picks: picks, pairings: normalizePairings(raw.g || raw.pairings), ko: normalizeKo(raw.k || raw.ko) };
   }
 
   function readHashState() {
@@ -6493,7 +6411,7 @@ body { font-size: 16px; }
 
   function saveState() {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: APP_VERSION, s: state.seeds, p: state.picks, k: state.ko }));
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ v: APP_VERSION, s: state.seeds, p: state.picks, g: state.pairings, k: state.ko }));
     } catch (err) { /* storage may be unavailable */ }
   }
 
@@ -6502,6 +6420,7 @@ body { font-size: 16px; }
       teamIds: TEAM_IDS,
       r1Matches: R1_MATCHES,
       picks: state.picks,
+      pairings: state.pairings,
       seeds: state.seeds
     });
   }
@@ -7545,6 +7464,7 @@ body { font-size: 16px; }
     if (isActive) classes.push('is-active');
     if (round.complete) classes.push('is-complete');
     if (isFresh) classes.push('is-fresh');
+    if (pairMode && isActive) classes.push('is-pairing');
 
     var canRedraw = round.number > 1 && isActive && !round.matches.some(function (match) { return match.decided; });
     var stateLabel = isActive ? 'LIVE' : (round.complete ? 'FINAL' : 'LOCKED');
@@ -7559,6 +7479,7 @@ body { font-size: 16px; }
         '<div class="round__sub">' +
           '<span class="mono">' + formatSummary(round) + '</span>' +
           (canRedraw ? '<button type="button" class="round__redraw" data-redraw="' + round.number + '">' + ICONS.shuffle + '重抽</button>' : '') +
+          (canRedraw ? '<button type="button" class="round__redraw round__pair" data-pair="' + round.number + '">' + (pairMode ? '完成调整' : '调整对阵') + '</button>' : '') +
         '</div>' +
       '</header>';
 
@@ -8418,6 +8339,7 @@ body { font-size: 16px; }
     var previousScroll = dom.board.scrollLeft;
 
     renderHeader();
+    if (pairMode) dom.pickHint.textContent = '调整对阵：拖动战队到同战绩的另一场 · 交换位置';
     renderRail();
     renderBoard(options);
     reconcileKo();
@@ -8523,6 +8445,7 @@ body { font-size: 16px; }
     for (var round = fromRound + 1; round <= 5; round++) {
       cleared += (state.picks[round] || []).filter(Boolean).length;
       state.picks[round] = [];
+      delete state.pairings[round];
     }
     return cleared;
   }
@@ -8581,12 +8504,48 @@ body { font-size: 16px; }
     if (!state.picks[round] || !state.picks[round][index]) return;
 
     var snapshot = cloneState();
+    pairMode = false;
     state.picks[round][index] = null;
     var cleared = clearDownstream(round);
     model = computeModel();
     saveState();
     renderAll({});
     showToast(cleared ? '已清除该场预测 · 后续 ' + cleared + ' 场重置' : '已清除该场预测', { undo: snapshot });
+  }
+
+  function swapPairing(sourceMatch, targetMatch, sourceTeam, targetTeam) {
+    if (!sourceMatch || !targetMatch || sourceMatch.id === targetMatch.id) return false;
+    var roundNo = sourceMatch.round;
+    if (targetMatch.round !== roundNo || sourceMatch.pool !== targetMatch.pool) {
+      showToast('只能交换同战绩对局', { tone: 'red' });
+      return false;
+    }
+    if (sourceTeam === targetTeam) return false;
+    if (targetMatch.a !== targetTeam && targetMatch.b !== targetTeam) return false;
+
+    var snapshot = cloneState();
+    var replace = function (match, oldId, newId) {
+      if (match.a === oldId) match.a = newId;
+      else if (match.b === oldId) match.b = newId;
+    };
+    replace(sourceMatch, sourceTeam, targetTeam);
+    replace(targetMatch, targetTeam, sourceTeam);
+
+    var round = model.rounds[roundNo - 1];
+    var override = {};
+    round.pools.forEach(function (pool) {
+      override[pool.record] = pool.matches.map(function (m) { return [m.a, m.b]; });
+    });
+    state.pairings = state.pairings || {};
+    state.pairings[roundNo] = override;
+    state.picks[roundNo] = [];
+    clearDownstream(roundNo);
+    pairMode = true;
+    model = computeModel();
+    saveState();
+    renderAll({ scrollToRound: roundNo });
+    showToast('已交换第 ' + roundNo + ' 轮对阵', { undo: snapshot });
+    return true;
   }
 
   function redrawRound(roundNumber) {
@@ -8596,6 +8555,7 @@ body { font-size: 16px; }
     if (!round || round.matches.some(function (match) { return match.decided; })) return;
 
     var snapshot = cloneState();
+    pairMode = false;
     state.seeds[roundNumber] = randomSeed();
     state.picks[roundNumber] = [];
     clearDownstream(roundNumber);
@@ -8609,7 +8569,8 @@ body { font-size: 16px; }
     if (!snapshot) return;
     state = {
       seeds: {},
-      picks: {}
+      picks: {},
+      pairings: normalizePairings(snapshot.pairings)
     };
     [2, 3, 4, 5].forEach(function (round) { state.seeds[round] = snapshot.seeds[round]; });
     [1, 2, 3, 4, 5].forEach(function (round) { state.picks[round] = (snapshot.picks[round] || []).slice(); });
@@ -8638,6 +8599,7 @@ body { font-size: 16px; }
     dom.btnReset.classList.remove('is-armed');
     resetAll.armedUntil = 0;
     var snapshot = cloneState();
+    pairMode = false;
     state = freshState();
     model = computeModel();
     saveState();
@@ -8649,7 +8611,7 @@ body { font-size: 16px; }
   }
 
   function shareUrl() {
-    var payload = { v: APP_VERSION, s: state.seeds, p: state.picks, k: state.ko };
+    var payload = { v: APP_VERSION, s: state.seeds, p: state.picks, g: state.pairings, k: state.ko };
     var encoded = base64UrlEncode(JSON.stringify(payload));
     return window.location.href.split('#')[0] + '#p=' + encoded;
   }
@@ -8689,6 +8651,7 @@ body { font-size: 16px; }
       matchEl: matchEl,
       match: match,
       ko: isKo,
+      pairing: !!pairMode,
       teamId: isKo ? row.getAttribute('data-ko-team') : row.getAttribute('data-team'),
       startX: event.clientX,
       startY: event.clientY,
@@ -8732,6 +8695,9 @@ body { font-size: 16px; }
     var el = document.elementFromPoint(x, y);
     drag.ghost.style.display = '';
     var matchEl = el && el.closest ? el.closest('.match, .ko-match') : null;
+    if (drag.pairing) {
+      return matchEl && matchEl.getAttribute('data-round') === String(drag.match.round) ? matchEl : null;
+    }
     return matchEl && matchEl === drag.matchEl ? matchEl : null;
   }
 
@@ -8756,7 +8722,7 @@ body { font-size: 16px; }
     drag.row.classList.add('is-drag-source');
     document.body.classList.add('is-dragging');
     if (drag.hintEl) {
-      drag.hintEl.textContent = '释放 · 预测 ' + TEAM[drag.teamId].code + ' 胜出';
+      drag.hintEl.textContent = drag.pairing ? '释放 · 交换对阵' : '释放 · 预测 ' + TEAM[drag.teamId].code + ' 胜出';
       drag.hintEl.classList.add('is-drop-hint');
     }
   }
@@ -8783,6 +8749,17 @@ body { font-size: 16px; }
     var wasActive = info.active;
     var target = wasActive ? elementMatchAt(event.clientX, event.clientY) : null;
     cleanupDrag();
+
+    if (info.pairing) {
+      if (!wasActive || !target) return;
+      var targetMatch = findMatch(target.getAttribute('data-match'));
+      if (!targetMatch) return;
+      var under = document.elementFromPoint(event.clientX, event.clientY);
+      var targetTeamEl = under && under.closest ? under.closest('.team') : null;
+      var targetTeam = targetTeamEl ? targetTeamEl.getAttribute('data-team') : targetMatch.a;
+      swapPairing(info.match, targetMatch, info.teamId, targetTeam);
+      return;
+    }
 
     if (info.ko) {
       if (!wasActive || target) applyKoPick(info.match.id, info.teamId);
@@ -8816,6 +8793,13 @@ body { font-size: 16px; }
       var redrawBtn = event.target.closest('.round__redraw');
       if (redrawBtn) {
         event.preventDefault();
+        var pairRound = redrawBtn.getAttribute('data-pair');
+        if (pairRound) {
+          pairMode = !pairMode;
+          renderAll({ scrollToRound: parseInt(pairRound, 10) });
+          showToast(pairMode ? '调整对阵：拖动战队到同战绩的另一场' : '已退出对阵调整');
+          return;
+        }
         redrawRound(parseInt(redrawBtn.getAttribute('data-redraw'), 10));
         return;
       }
@@ -8835,7 +8819,7 @@ body { font-size: 16px; }
       }
 
       var team = event.target.closest('.team');
-      if (team && event.detail === 0) {
+      if (team && event.detail === 0 && !pairMode) {
         var matchEl = team.closest('.match');
         if (matchEl) applyPick(matchEl.getAttribute('data-match'), team.getAttribute('data-team'));
       }
