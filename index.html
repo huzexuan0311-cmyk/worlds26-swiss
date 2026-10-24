@@ -4206,6 +4206,7 @@ body { font-size: 16px; }
       <button type="button" class="viewswitch__btn is-active" data-board-mode="predict">我的预测</button>
       <button type="button" class="viewswitch__btn" data-board-mode="live">实时赛果 <i class="board-mode__live"></i></button>
       <span class="viewswitch__status mono" id="live-status">等待连接</span>
+      <button type="button" class="viewswitch__btn viewswitch__btn--adopt" id="btn-adopt-live" hidden>按赛果继续预测</button>
     </div>
 
     <div class="railbar" id="railbar">
@@ -5618,6 +5619,8 @@ body { font-size: 16px; }
     'Gen.G': 'GEN',
     'Invictus Gaming': 'IG'
   };
+  root.PM_MARKETS_API = 'https://vercel-seven-opal-76.vercel.app/api/markets';
+  root.PM_ALL_2026 = root.PM_R1_2026.slice();
   root.PM_LIVE = { ok: false, at: null, error: null, source: 'snapshot' };
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -7054,9 +7057,10 @@ body { font-size: 16px; }
   }
 
   function marketForPair(teamA, teamB) {
-    if (!window.PM_R1_2026) return null;
-    for (var i = 0; i < window.PM_R1_2026.length; i++) {
-      var row = window.PM_R1_2026[i];
+    var rows = window.PM_ALL_2026 || window.PM_R1_2026;
+    if (!rows) return null;
+    for (var i = 0; i < rows.length; i++) {
+      var row = rows[i];
       if (row.a === teamA && row.b === teamB) return { p: row.pA, meta: window.PM_R1_META, live: window.PM_LIVE.ok, frozen: !!row.frozen };
       if (row.a === teamB && row.b === teamA) return { p: 1 - row.pA, meta: window.PM_R1_META, live: window.PM_LIVE.ok, frozen: !!row.frozen };
     }
@@ -7064,7 +7068,7 @@ body { font-size: 16px; }
   }
 
   function marketFor(match) {
-    if (!match || match.round !== 1) return null;
+    if (!match) return null;
     return marketForPair(match.a, match.b);
   }
 
@@ -7176,7 +7180,7 @@ body { font-size: 16px; }
     if (marketSocket) return;
     var assets = [];
     marketTokenMap = {};
-    window.PM_R1_2026.forEach(function (row) {
+    (window.PM_ALL_2026 || window.PM_R1_2026).forEach(function (row) {
       if (!row.tokens) return;
       row.tokens.forEach(function (token, side) {
         marketTokenMap[token] = { row: row, side: side };
@@ -7213,10 +7217,57 @@ body { font-size: 16px; }
     };
   }
 
+  function restartMarketSocket() {
+    if (marketSocket) {
+      marketSocket.onclose = null;
+      try { marketSocket.close(); } catch (err) { /* ignore */ }
+      marketSocket = null;
+    }
+    if (marketSocketTimer) { window.clearTimeout(marketSocketTimer); marketSocketTimer = null; }
+    marketTokenMap = null;
+    startMarketSocket();
+  }
+
+  function refreshPolymarketMarkets() {
+    if (!window.PM_MARKETS_API) return;
+    fetch(window.PM_MARKETS_API, { cache: 'no-store' }).then(function (res) {
+      if (!res.ok) throw new Error('markets api ' + res.status);
+      return res.json();
+    }).then(function (data) {
+      if (!data || !Array.isArray(data.markets) || !data.markets.length) return;
+      var code = window.PM_TEAM_CODES || {};
+      var existing = window.PM_ALL_2026 || [];
+      var merged = existing.slice();
+      data.markets.forEach(function (m) {
+        var a = code[m.a] || m.a;
+        var b = code[m.b] || m.b;
+        if (!a || !b || typeof m.pA !== 'number') return;
+        var row = null;
+        for (var i = 0; i < merged.length; i++) {
+          if ((merged[i].a === a && merged[i].b === b) || (merged[i].a === b && merged[i].b === a)) { row = merged[i]; break; }
+        }
+        if (!row) {
+          row = { a: a, b: b };
+          merged.push(row);
+        }
+        row.pA = m.pA;
+        row.start = m.start || row.start || '';
+        row.tokens = Array.isArray(m.tokens) ? m.tokens.slice(0, 2) : row.tokens;
+        row.dynamic = true;
+      });
+      window.PM_ALL_2026 = merged;
+      window.PM_LIVE.at = data.updatedAt || new Date().toISOString();
+      restartMarketSocket();
+      updateMarketBadges();
+      updateLiveStatus();
+    }).catch(function () { /* keep static R1 fallback */ });
+  }
+
   function refreshFrozenMarket() {
-    if (!window.PM_R1_2026 || !window.PM_HISTORY_API) return;
+    var rows = window.PM_ALL_2026 || window.PM_R1_2026;
+    if (!rows || !window.PM_HISTORY_API) return;
     var now = Date.now();
-    window.PM_R1_2026.forEach(function (row) {
+    rows.forEach(function (row) {
       if (!row.tokens || !row.start || row.historyChecked) return;
       var start = Date.parse(row.start);
       if (!isFinite(start) || now < start - 60000) return;
@@ -7553,6 +7604,7 @@ body { font-size: 16px; }
     var total = (Number(aScore) || 0) + (Number(bScore) || 0);
     var width = total > 0 ? (Number(aScore) / total) * 100 : 50;
     var stateText = match.state === 'completed' ? '已完成' : (match.state === 'inProgress' ? '进行中' : '未开始');
+    var market = marketForPair(match.a, match.b);
     return '<article class="' + classes.join(' ') + '" data-live="' + esc(match.id) + '" data-teams="' + match.a + ' ' + match.b + '" style="--i:' + index + '">' +
       renderLiveTeam(match.a, match, aScore, aWin, isDone && bWin) +
       '<div class="match__vs" aria-hidden="true"></div>' +
@@ -7563,6 +7615,7 @@ body { font-size: 16px; }
       '<footer class="match__foot">' +
         '<span class="match__meta-mono mono">#' + pad2(match.number) + ' · ' + match.format + '</span>' +
         '<span class="match__market mono">' + esc(stateText) + '</span>' +
+        (market ? '<span class="match__market mono" title="Polymarket 实时/赛前">MKT ' + marketPct(market.p) + '%</span>' : '') +
         (!isDone && match.liveP != null ? '<span class="match__market mono" title="LIVE GLICKO 胜率（实际赛果驱动，不参与默认 BT）">LIVE ' + Math.round(match.liveP * 100) + '%</span>' : '') +
       '</footer>' +
     '</article>';
@@ -7611,6 +7664,7 @@ body { font-size: 16px; }
     dom.statEliminated.textContent = live.eliminated.length;
     dom.statRemaining.textContent = live.totals.remaining;
     updateBoardMode();
+    if (dom.btnAdoptLive) dom.btnAdoptLive.hidden = !(live.totals.played > 0);
     scheduleBracketLines();
   }
 
@@ -8528,6 +8582,7 @@ body { font-size: 16px; }
     renderSwissOdds();
     scheduleBracketLines();
     updateBoardMode();
+    if (dom.btnAdoptLive) dom.btnAdoptLive.hidden = true;
 
     dom.board.scrollLeft = previousScroll;
     window.requestAnimationFrame(function () {
@@ -8691,6 +8746,60 @@ body { font-size: 16px; }
     saveState();
     renderAll({});
     showToast(cleared ? '已清除该场预测 · 后续 ' + cleared + ' 场重置' : '已清除该场预测', { undo: snapshot });
+  }
+
+  function adoptActualResults() {
+    var live = buildLiveModel();
+    if (!live.totals.played) {
+      showToast('还没有已完成的比赛', { tone: 'red' });
+      return;
+    }
+    var snapshot = cloneState();
+    var next = {
+      seeds: {},
+      picks: { 1: [], 2: [], 3: [], 4: [], 5: [] },
+      pairings: {},
+      ko: emptyKo()
+    };
+    [2, 3, 4, 5].forEach(function (round) { next.seeds[round] = randomSeed(); });
+    live.rounds.forEach(function (round) {
+      if (!round.matches.length) return;
+      var byRecord = {};
+      round.pools.forEach(function (pool) {
+        if (!pool.matches.length) return;
+        byRecord[pool.record] = pool.matches.map(function (m) { return [m.a, m.b]; });
+      });
+      if (Object.keys(byRecord).length) next.pairings[round.number] = byRecord;
+    });
+    for (var r = 1; r <= 5; r++) {
+      var actualRound = live.rounds[r - 1];
+      if (!actualRound || !actualRound.matches.length) continue;
+      var engineModel = ENG.compute({
+        teamIds: TEAM_IDS,
+        r1Matches: R1_MATCHES,
+        picks: next.picks,
+        pairings: next.pairings,
+        seeds: next.seeds
+      });
+      var engineRound = engineModel.rounds[r - 1];
+      if (!engineRound) continue;
+      actualRound.matches.forEach(function (am) {
+        if (am.state !== 'completed' || !am.winner) return;
+        var idx = -1;
+        for (var j = 0; j < engineRound.matches.length; j++) {
+          var em = engineRound.matches[j];
+          if ((em.a === am.a && em.b === am.b) || (em.a === am.b && em.b === am.a)) { idx = j; break; }
+        }
+        if (idx >= 0) next.picks[r][idx] = am.winner;
+      });
+    }
+    state = next;
+    pairMode = false;
+    boardMode = 'predict';
+    model = computeModel();
+    saveState();
+    renderAll({ freshRound: model.activeRound });
+    showToast('已按 ' + live.totals.played + ' 场实时赛果填入预测 · 可继续往后预测', { undo: snapshot });
   }
 
   function swapPairing(sourceMatch, targetMatch, sourceTeam, targetTeam) {
@@ -9088,6 +9197,7 @@ body { font-size: 16px; }
 
     dom.btnModel.addEventListener('click', openModelDialog);
     if (dom.btnResults) dom.btnResults.addEventListener('click', openResultsDialog);
+    if (dom.btnAdoptLive) dom.btnAdoptLive.addEventListener('click', adoptActualResults);
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-board-mode]'), function (button) {
       button.addEventListener('click', function () {
@@ -9307,6 +9417,7 @@ body { font-size: 16px; }
     dom.statRemaining = document.getElementById('stat-remaining');
     dom.pickHint = document.getElementById('pick-hint');
     dom.liveStatus = document.getElementById('live-status');
+    dom.btnAdoptLive = document.getElementById('btn-adopt-live');
     dom.railbar = document.getElementById('railbar');
     dom.railnav = document.getElementById('railnav');
     dom.railProgress = document.getElementById('rail-progress');
@@ -9451,11 +9562,13 @@ body { font-size: 16px; }
     renderAll({ freshRound: model.activeRound });
     refreshMarket();
     startMarketSocket();
+    refreshPolymarketMarkets();
     refreshResults();
     refreshFrozenMarket();
     updateLiveStatus();
     window.setInterval(refreshMarket, 60000);
     window.setInterval(refreshFrozenMarket, 60000);
+    window.setInterval(refreshPolymarketMarkets, 300000);
     window.setInterval(refreshResults, 60000);
     if (hashState) showToast('已载入分享的预测');
   }
